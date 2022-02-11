@@ -29,6 +29,21 @@ type diskFS struct {
 	workingDir string
 }
 
+func newDiskFS() (*diskFS, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, fmt.Errorf("getting home dir: %v\n", err)
+	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		return nil, fmt.Errorf("getting working dir: %v\n", err)
+	}
+	return &diskFS{
+		homeDir:    homeDir,
+		workingDir: cwd,
+	}, nil
+}
+
 func (fs *diskFS) HomeDir() string {
 	return fs.homeDir
 }
@@ -80,17 +95,9 @@ func run() error {
 		ContrastBg: color.NRGBA{220, 220, 220, 255},
 	}
 
-	homeDir, err := os.UserHomeDir()
+	fs, err := newDiskFS()
 	if err != nil {
-		return fmt.Errorf("getting home dir: %v\n", err)
-	}
-	cwd, err := os.Getwd()
-	if err != nil {
-		return fmt.Errorf("getting working dir: %v\n", err)
-	}
-	fs := &diskFS{
-		homeDir:    homeDir,
-		workingDir: cwd,
+		return err
 	}
 
 	s := mdedit.NewSession(fs, win)
