@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"image/color"
@@ -69,9 +68,6 @@ func (_ *diskFS) ReadDir(fpath string) ([]fs.FileInfo, error) {
 }
 
 func (_ *diskFS) ReadFile(fpath string) ([]byte, error) {
-	if fpath == "" {
-		return nil, errors.New("empty file path")
-	}
 	return os.ReadFile(fpath)
 }
 

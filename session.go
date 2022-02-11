@@ -159,6 +159,10 @@ func (s *session) OpenFileExplorerTab() {
 }
 
 func (s *session) OpenFile(fpath string) {
+	if fpath == "" {
+		log.Println("open file: empty file path")
+		return
+	}
 	data, err := s.fs.ReadFile(fpath)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		log.Printf("reading '%s': %w\n", fpath, err)
@@ -182,6 +186,7 @@ func (s *session) OpenFile(fpath string) {
 
 func (s *session) openExplorerDir(t *explorerTab, fpath string) {
 	if fpath == "" {
+		log.Println("open dir: empty file path")
 		return
 	}
 	fpath = path.Clean(fpath)
