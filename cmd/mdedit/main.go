@@ -52,17 +52,6 @@ func (fs *diskFS) WorkingDir() string {
 	return fs.workingDir
 }
 
-func (_ *diskFS) ReadFile(fpath string) ([]byte, error) {
-	if fpath == "" {
-		return nil, errors.New("empty file path")
-	}
-	data, err := os.ReadFile(fpath)
-	if err != nil {
-		return nil, fmt.Errorf("reading '%s': %w\n", fpath, err)
-	}
-	return data, nil
-}
-
 func (_ *diskFS) ReadDir(fpath string) ([]fs.FileInfo, error) {
 	entries, err := os.ReadDir(fpath)
 	if err != nil {
@@ -77,6 +66,21 @@ func (_ *diskFS) ReadDir(fpath string) ([]fs.FileInfo, error) {
 		infos[i] = info
 	}
 	return infos, nil
+}
+
+func (_ *diskFS) ReadFile(fpath string) ([]byte, error) {
+	if fpath == "" {
+		return nil, errors.New("empty file path")
+	}
+	data, err := os.ReadFile(fpath)
+	if err != nil {
+		return nil, fmt.Errorf("reading '%s': %w\n", fpath, err)
+	}
+	return data, nil
+}
+
+func (_ *diskFS) WriteFile(fpath string, data []byte) error {
+	return os.WriteFile(fpath, data, 0o644)
 }
 
 func run() error {

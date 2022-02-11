@@ -6,7 +6,6 @@ import (
 	"image/color"
 	"io/fs"
 	"log"
-	"os"
 	"path"
 	"path/filepath"
 	"sort"
@@ -25,8 +24,9 @@ import (
 type FS interface {
 	HomeDir() string
 	WorkingDir() string
-	ReadFile(fpath string) ([]byte, error)
 	ReadDir(fpath string) ([]fs.FileInfo, error)
+	ReadFile(fpath string) ([]byte, error)
+	WriteFile(fpath string, data []byte) error
 }
 
 type session struct {
@@ -202,7 +202,7 @@ func (s *session) openExplorerDir(t *explorerTab, fpath string) {
 }
 
 func (s *session) writeFile(fpath string, data []byte) {
-	if err := os.WriteFile(fpath, data, 0o644); err != nil {
+	if err := s.fs.WriteFile(fpath, data); err != nil {
 		log.Println(err)
 	}
 }
