@@ -32,11 +32,11 @@ type diskFS struct {
 func newDiskFS() (*diskFS, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return nil, fmt.Errorf("getting home dir: %v\n", err)
+		return nil, fmt.Errorf("getting home dir: %w\n", err)
 	}
 	cwd, err := os.Getwd()
 	if err != nil {
-		return nil, fmt.Errorf("getting working dir: %v\n", err)
+		return nil, fmt.Errorf("getting working dir: %w\n", err)
 	}
 	return &diskFS{
 		homeDir:    homeDir,
