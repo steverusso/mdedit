@@ -3,10 +3,10 @@ module github.com/steverusso/mdedit
 go 1.17
 
 require (
-	gioui.org v0.0.0-20220204132023-1c2e96bcc79f
-	gioui.org/x v0.0.0-20220201115349-8fb85f1fee87
-	github.com/yuin/goldmark v1.4.4
-	golang.org/x/exp v0.0.0-20220203164150-d4f80a91470e
+	gioui.org v0.0.0-20220211124213-9e23412a0194
+	gioui.org/x v0.0.0-20220207222704-60bcbabb6b02
+	github.com/yuin/goldmark v1.4.5
+	golang.org/x/exp/shiny v0.0.0-20220209042442-160e291fcf24
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410
 )
 
