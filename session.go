@@ -161,7 +161,7 @@ func (s *session) OpenFileExplorerTab() {
 func (s *session) OpenFile(fpath string) {
 	data, err := s.fs.ReadFile(fpath)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
-		log.Println(err)
+		log.Printf("reading '%s': %w\n", fpath, err)
 		return
 	}
 	name := fpath

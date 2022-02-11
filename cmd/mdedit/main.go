@@ -72,11 +72,7 @@ func (_ *diskFS) ReadFile(fpath string) ([]byte, error) {
 	if fpath == "" {
 		return nil, errors.New("empty file path")
 	}
-	data, err := os.ReadFile(fpath)
-	if err != nil {
-		return nil, fmt.Errorf("reading '%s': %w\n", fpath, err)
-	}
-	return data, nil
+	return os.ReadFile(fpath)
 }
 
 func (_ *diskFS) WriteFile(fpath string, data []byte) error {
