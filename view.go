@@ -96,6 +96,7 @@ func (vw *View) update(gtx C) {
 	// Update which single view widget to show.
 	if vw.showEditor.Clicked() {
 		vw.singleWidget = singleViewEditor
+		vw.Editor.Focus()
 		op.InvalidateOp{}.Add(gtx.Ops)
 	}
 	if vw.showDocument.Clicked() {
