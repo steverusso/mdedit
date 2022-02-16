@@ -59,9 +59,10 @@ type View struct {
 	doSplitView  widget.Clickable
 	doSingleView widget.Clickable
 
-	SplitRatio  float32 // portion of total space to allow the first widget
-	dividerPos  int     // position (in pixels) of the divider
-	dividerDrag gesture.Drag
+	SplitRatio   float32 // portion of total space to allow the first widget
+	dividerPos   int     // position (in pixels) of the divider
+	dividerDrag  gesture.Drag
+	dividerClick gesture.Click
 
 	singleWidget activeWidget
 	showEditor   widget.Clickable
@@ -96,6 +97,7 @@ func (vw *View) update(gtx C) {
 	// Update which single view widget to show.
 	if vw.showEditor.Clicked() {
 		vw.singleWidget = singleViewEditor
+		vw.Editor.Focus()
 		op.InvalidateOp{}.Add(gtx.Ops)
 	}
 	if vw.showDocument.Clicked() {
@@ -148,6 +150,12 @@ func (vw *View) layDivider(gtx C, w layout.Widget) D {
 	if de != nil {
 		vw.dividerPos += int(de.Position.X)
 	}
+	for _, e := range vw.dividerClick.Events(gtx) {
+		if e.Type == gesture.TypeClick && e.NumClicks == 2 {
+			vw.SplitRatio = 0.5
+			vw.dividerPos = int(vw.SplitRatio * float32(gtx.Constraints.Max.X))
+		}
+	}
 
 	if vw.dividerPos < 0 {
 		vw.dividerPos = 0
@@ -160,6 +168,7 @@ func (vw *View) layDivider(gtx C, w layout.Widget) D {
 	defer clip.Rect(rect).Push(gtx.Ops).Pop()
 
 	vw.dividerDrag.Add(gtx.Ops)
+	vw.dividerClick.Add(gtx.Ops)
 	pointer.CursorNameOp{Name: pointer.CursorColResize}.Add(gtx.Ops)
 	return dims
 }
