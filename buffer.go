@@ -167,7 +167,9 @@ func (b *buffer) set(data []byte) {
 	for i := 0; i < len(data); i++ {
 		switch {
 		case i == eofIndex:
-			i++
+			if data[i] != '\n' {
+				i++
+			}
 			fallthrough
 		case data[i] == '\n':
 			lines = append(lines, newLine(data[leftOff:i]))
