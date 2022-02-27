@@ -107,7 +107,7 @@ func (vw *View) update(gtx C) {
 }
 
 func (vw *View) laySplitView(gtx C, th *material.Theme, edFnt text.Font, pal Palette) D {
-	if vw.Editor.Changed() {
+	if vw.Editor.HasChanged() {
 		vw.Editor.highlight()
 		_ = vw.document.Render(vw.Editor.Text(), th)
 	}
@@ -177,7 +177,7 @@ func (vw *View) laySingleView(gtx C, th *material.Theme, edFnt text.Font, pal Pa
 	if vw.singleWidget == singleViewDocument {
 		return vw.document.Layout(gtx, th)
 	}
-	if vw.Editor.Changed() {
+	if vw.Editor.HasChanged() {
 		vw.Editor.highlight()
 		_ = vw.document.Render(vw.Editor.Text(), th)
 	}

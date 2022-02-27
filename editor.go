@@ -37,13 +37,13 @@ type Editor struct {
 	active  action
 	history []action
 
-	eventKey byte
-	reqSave  bool
-	reqFocus bool
-	changed  bool
-	click    gesture.Click
-	hltr     highlighter
-	styles   styling
+	eventKey    byte
+	reqSave     bool
+	reqFocus    bool
+	changed     bool
+	click       gesture.Click
+	highlighter highlighter
+	styles      styling
 
 	maxSize    image.Point
 	shaper     text.Shaper
@@ -408,10 +408,10 @@ func (ed *Editor) SetText(data []byte) {
 }
 
 func (ed *Editor) highlight() {
-	if ed.hltr == nil {
-		ed.hltr = &mdHighlighter{}
+	if ed.highlighter == nil {
+		ed.highlighter = &mdHighlighter{}
 	}
-	ed.styles = ed.hltr.highlight(&ed.buf)
+	ed.styles = ed.highlighter.highlight(&ed.buf)
 }
 
 func (ed *Editor) Text() []byte {
@@ -428,7 +428,7 @@ func (ed *Editor) SaveRequested() bool {
 	return v
 }
 
-func (ed *Editor) Changed() bool {
+func (ed *Editor) HasChanged() bool {
 	v := ed.changed
 	ed.changed = false
 	return v
