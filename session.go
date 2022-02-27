@@ -134,9 +134,9 @@ func (s *Session) layMarkdownTab(gtx C, th *material.Theme, t *markdownTab) D {
 func (s *Session) layExplorerTab(gtx C, th *material.Theme, t *explorerTab) D {
 	for _, e := range t.expl.Events() {
 		switch e := e.(type) {
-		case ChoseDir:
+		case DirChosenEvent:
 			go s.openExplorerDir(t, e.Path)
-		case ChoseFiles:
+		case FilesChosenEvent:
 			go func() {
 				for i, fpath := range e.Paths {
 					s.OpenFile(fpath)
