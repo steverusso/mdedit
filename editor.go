@@ -38,21 +38,21 @@ type Editor struct {
 	history []action
 
 	eventKey byte
-	reqSave  bool
-	reqFocus bool
-	changed  bool
 	click    gesture.Click
-	hltr     highlighter
-	styles   styling
+	reqFocus bool
+	reqSave  bool
+	changed  bool
 
-	maxSize    image.Point
-	shaper     text.Shaper
-	font       text.Font
-	textSize   unit.Value
-	palette    Palette
-	charWidth  int
-	lnHeight   int
-	lnNumSpace int
+	maxSize     image.Point
+	shaper      text.Shaper
+	font        text.Font
+	textSize    unit.Value
+	palette     Palette
+	charWidth   int
+	lnHeight    int
+	lnNumSpace  int
+	highlighter highlighter
+	styles      styling
 }
 
 func (ed *Editor) Layout(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Value, pal Palette) D {
@@ -408,10 +408,10 @@ func (ed *Editor) SetText(data []byte) {
 }
 
 func (ed *Editor) highlight() {
-	if ed.hltr == nil {
-		ed.hltr = &mdHighlighter{}
+	if ed.highlighter == nil {
+		ed.highlighter = &mdHighlighter{}
 	}
-	ed.styles = ed.hltr.highlight(&ed.buf)
+	ed.styles = ed.highlighter.highlight(&ed.buf)
 }
 
 func (ed *Editor) Text() []byte {
@@ -428,7 +428,7 @@ func (ed *Editor) SaveRequested() bool {
 	return v
 }
 
-func (ed *Editor) Changed() bool {
+func (ed *Editor) HasChanged() bool {
 	v := ed.changed
 	ed.changed = false
 	return v

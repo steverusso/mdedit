@@ -35,7 +35,7 @@ func NewExplorer(rootDir, openToDir string) *Explorer {
 	if openToDir == "" {
 		openToDir = rootDir
 	}
-	ex.events = append(ex.events, ChoseDir{openToDir})
+	ex.events = append(ex.events, DirChosenEvent{openToDir})
 	return ex
 }
 
@@ -64,7 +64,7 @@ func (ex *Explorer) update(gtx C) {
 }
 
 func (ex *Explorer) chooseDir(gtx C, fpath string) {
-	ex.events = append(ex.events, ChoseDir{fpath})
+	ex.events = append(ex.events, DirChosenEvent{fpath})
 	op.InvalidateOp{}.Add(gtx.Ops)
 }
 
@@ -121,7 +121,7 @@ func (ex *Explorer) layEntryList(gtx C, th *material.Theme) D {
 				if en.info.IsDir() {
 					ex.chooseDir(gtx, fpath)
 				} else {
-					ex.events = append(ex.events, ChoseFiles{[]string{fpath}})
+					ex.events = append(ex.events, FilesChosenEvent{[]string{fpath}})
 				}
 				op.InvalidateOp{}.Add(gtx.Ops)
 			}
@@ -261,11 +261,11 @@ func newExplorerEntry(info fs.FileInfo) explEntry {
 	}
 }
 
-func (a *explEntry) isLessThan(b *explEntry) bool {
-	if a.info.IsDir() != b.info.IsDir() {
-		return a.info.Name() < b.info.Name()
+func (en *explEntry) isLessThan(other *explEntry) bool {
+	if en.info.IsDir() != other.info.IsDir() {
+		return en.info.Name() < other.info.Name()
 	}
-	return a.info.IsDir()
+	return en.info.IsDir()
 }
 
 func (en *explEntry) layout(gtx C, th *material.Theme) D {
@@ -355,10 +355,10 @@ func headerLbl(th *material.Theme, txt string) layout.Widget {
 
 type ExplorerEvent interface{}
 
-type ChoseFiles struct {
+type FilesChosenEvent struct {
 	Paths []string
 }
 
-type ChoseDir struct {
+type DirChosenEvent struct {
 	Path string
 }

@@ -43,12 +43,12 @@ func newDiskFS() (*diskFS, error) {
 	}, nil
 }
 
-func (fs *diskFS) HomeDir() string {
-	return fs.homeDir
+func (d *diskFS) HomeDir() string {
+	return d.homeDir
 }
 
-func (fs *diskFS) WorkingDir() string {
-	return fs.workingDir
+func (d *diskFS) WorkingDir() string {
+	return d.workingDir
 }
 
 func (_ *diskFS) ReadDir(fpath string) ([]fs.FileInfo, error) {
@@ -91,12 +91,12 @@ func run() error {
 		ContrastBg: color.NRGBA{220, 220, 220, 255},
 	}
 
-	fs, err := newDiskFS()
+	fsys, err := newDiskFS()
 	if err != nil {
 		return err
 	}
 
-	s := mdedit.NewSession(fs, win)
+	s := mdedit.NewSession(fsys, win)
 	for _, fpath := range flag.Args() {
 		s.OpenFile(fpath)
 	}

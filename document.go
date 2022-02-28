@@ -254,8 +254,7 @@ func (sb *spanBuilder) renderListItem(_ util.BufWriter, _ []byte, node ast.Node,
 }
 
 func (sb *spanBuilder) renderParagraph(_ util.BufWriter, _ []byte, _ ast.Node, entering bool) (ast.WalkStatus, error) {
-	if entering {
-	} else {
+	if !entering {
 		sb.commitGroup()
 	}
 	return ast.WalkContinue, nil

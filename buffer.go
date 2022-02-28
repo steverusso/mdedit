@@ -46,7 +46,7 @@ func (b *buffer) deleteBack() {
 		prev := b.prevLine()
 		prevLen := len(prev.text)
 		prev.text = append(prev.text, b.currentLine().text...)
-		// Cursor up a line, setting the column to it's length before being joined.
+		// Cursor up a line, setting the column to its length before being joined.
 		b.cursor.row--
 		b.cursor.col = prevLen
 		// Remove the current line and cursor up to the previous one.
@@ -111,7 +111,7 @@ func (b *buffer) deleteLines(y1, y2 int) {
 func (b *buffer) insertNewLine() {
 	ln := &b.lines[b.cursor.row]
 	// Truncate the current line (from the cursor position on) and save the truncated text.
-	trunced := newLine(ln.text[b.cursor.col:])
+	trunced := lineFromBytes(ln.text[b.cursor.col:])
 	ln.text = ln.text[:b.cursor.col]
 	// Insert a duplicate of the current line and cursor to the beginning of that new line.
 	b.lines = append(b.lines[:b.cursor.row+1], b.lines[b.cursor.row:]...)
@@ -172,7 +172,7 @@ func (b *buffer) set(data []byte) {
 			}
 			fallthrough
 		case data[i] == '\n':
-			lines = append(lines, newLine(data[leftOff:i]))
+			lines = append(lines, lineFromBytes(data[leftOff:i]))
 			leftOff = i + 1
 		}
 	}
@@ -217,7 +217,7 @@ func (b *buffer) truncCurrentLineFromStart() {
 	ln.text = ln.text[:start]
 }
 
-func newLine(b []byte) (ln line) {
+func lineFromBytes(b []byte) (ln line) {
 	ln.text = append(make([]byte, 0, len(b)), b...)
 	return
 }
@@ -229,7 +229,7 @@ func (ln *line) charAt(i int) byte {
 	return ln.text[i]
 }
 
-func (ln *line) charIs(i int, cmps ...byte) bool {
+func (ln *line) charAtIs(i int, cmps ...byte) bool {
 	c := ln.charAt(i)
 	for _, v := range cmps {
 		if c == v {
@@ -257,7 +257,7 @@ func (ln *line) startingIndex() (start int) {
 
 func (ln *line) toggleCheckItem() {
 	col := ln.startingIndex() + 2
-	if ln.charIs(col, '[') && ln.charIs(col+2, ']') {
+	if ln.charAtIs(col, '[') && ln.charAtIs(col+2, ']') {
 		switch ln.text[col+1] {
 		case 'x':
 			ln.text[col+1] = ' '

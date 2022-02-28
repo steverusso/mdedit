@@ -29,8 +29,8 @@ type FS interface {
 	WriteFile(fpath string, data []byte) error
 }
 
-type session struct {
-	fs        FS
+type Session struct {
+	fsys      FS
 	win       *app.Window
 	tabs      []tab
 	tabList   layout.List
@@ -42,15 +42,15 @@ type tab struct {
 	content tabContent
 }
 
-func NewSession(fs FS, win *app.Window) session {
-	return session{
-		fs:      fs,
+func NewSession(fsys FS, win *app.Window) Session {
+	return Session{
+		fsys:    fsys,
 		win:     win,
 		tabList: layout.List{Axis: layout.Vertical},
 	}
 }
 
-func (s *session) Layout(gtx C, th *material.Theme) D {
+func (s *Session) Layout(gtx C, th *material.Theme) D {
 	if len(s.tabs) == 0 {
 		return layout.Center.Layout(gtx, func(gtx C) D {
 			return material.Body1(th, "Use Ctrl-O to open a file!").Layout(gtx)
@@ -100,7 +100,7 @@ func (s *session) Layout(gtx C, th *material.Theme) D {
 	)
 }
 
-func (s *session) layTabContent(gtx C, th *material.Theme, t tabContent) D {
+func (s *Session) layTabContent(gtx C, th *material.Theme, t tabContent) D {
 	switch t := t.(type) {
 	case *markdownTab:
 		return s.layMarkdownTab(gtx, th, t)
@@ -111,7 +111,7 @@ func (s *session) layTabContent(gtx C, th *material.Theme, t tabContent) D {
 	}
 }
 
-func (s *session) layMarkdownTab(gtx C, th *material.Theme, t *markdownTab) D {
+func (s *Session) layMarkdownTab(gtx C, th *material.Theme, t *markdownTab) D {
 	if t.view.Editor.SaveRequested() {
 		go s.writeFile(t.name, t.view.Editor.Text())
 	}
@@ -131,12 +131,12 @@ func (s *session) layMarkdownTab(gtx C, th *material.Theme, t *markdownTab) D {
 	}.Layout(gtx)
 }
 
-func (s *session) layExplorerTab(gtx C, th *material.Theme, t *explorerTab) D {
+func (s *Session) layExplorerTab(gtx C, th *material.Theme, t *explorerTab) D {
 	for _, e := range t.expl.Events() {
 		switch e := e.(type) {
-		case ChoseDir:
+		case DirChosenEvent:
 			go s.openExplorerDir(t, e.Path)
-		case ChoseFiles:
+		case FilesChosenEvent:
 			go func() {
 				for i, fpath := range e.Paths {
 					s.OpenFile(fpath)
@@ -151,28 +151,28 @@ func (s *session) layExplorerTab(gtx C, th *material.Theme, t *explorerTab) D {
 	return t.expl.Layout(gtx, th)
 }
 
-func (s *session) OpenFileExplorerTab() {
+func (s *Session) OpenFileExplorerTab() {
 	s.tabs = append(s.tabs, tab{content: &explorerTab{
-		expl: NewExplorer(s.fs.HomeDir(), s.fs.WorkingDir()),
+		expl: NewExplorer(s.fsys.HomeDir(), s.fsys.WorkingDir()),
 	}})
 	s.NextTab()
 }
 
-func (s *session) OpenFile(fpath string) {
+func (s *Session) OpenFile(fpath string) {
 	if fpath == "" {
 		log.Println("open file: empty file path")
 		return
 	}
-	data, err := s.fs.ReadFile(fpath)
+	data, err := s.fsys.ReadFile(fpath)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
-		log.Printf("reading '%s': %w\n", fpath, err)
+		log.Printf("reading '%s': %v\n", fpath, err)
 		return
 	}
 	name := fpath
 	if fpath[0] == '/' {
-		rel, err := filepath.Rel(s.fs.WorkingDir(), fpath)
+		rel, err := filepath.Rel(s.fsys.WorkingDir(), fpath)
 		if err != nil {
-			log.Printf("getting relative path '%s': %w\n", fpath, err)
+			log.Printf("getting relative path '%s': %v\n", fpath, err)
 			return
 		}
 		name = rel
@@ -184,13 +184,13 @@ func (s *session) OpenFile(fpath string) {
 	s.win.Invalidate()
 }
 
-func (s *session) openExplorerDir(t *explorerTab, fpath string) {
+func (s *Session) openExplorerDir(t *explorerTab, fpath string) {
 	if fpath == "" {
 		log.Println("open dir: empty file path")
 		return
 	}
 	fpath = path.Clean(fpath)
-	files, err := s.fs.ReadDir(fpath)
+	files, err := s.fsys.ReadDir(fpath)
 	if err != nil {
 		log.Println(err)
 		return
@@ -206,13 +206,13 @@ func (s *session) openExplorerDir(t *explorerTab, fpath string) {
 	s.win.Invalidate()
 }
 
-func (s *session) writeFile(fpath string, data []byte) {
-	if err := s.fs.WriteFile(fpath, data); err != nil {
+func (s *Session) writeFile(fpath string, data []byte) {
+	if err := s.fsys.WriteFile(fpath, data); err != nil {
 		log.Println(err)
 	}
 }
 
-func (s *session) CloseActiveTab() {
+func (s *Session) CloseActiveTab() {
 	s.tabs = append(s.tabs[:s.activeTab], s.tabs[s.activeTab+1:]...)
 	n := len(s.tabs)
 	if s.activeTab > 0 && s.activeTab >= n {
@@ -223,25 +223,25 @@ func (s *session) CloseActiveTab() {
 	}
 }
 
-func (s *session) FocusActiveTab() {
+func (s *Session) FocusActiveTab() {
 	if i := s.activeTab; i >= 0 && i < len(s.tabs) {
 		s.tabs[i].content.focus()
 	}
 }
 
-func (s *session) NextTab() {
+func (s *Session) NextTab() {
 	if s.activeTab < len(s.tabs)-1 {
 		s.activeTab++
 	}
 }
 
-func (s *session) PrevTab() {
+func (s *Session) PrevTab() {
 	if s.activeTab > 0 {
 		s.activeTab--
 	}
 }
 
-func (s *session) SwapTabUp() {
+func (s *Session) SwapTabUp() {
 	if s.activeTab == 0 {
 		return
 	}
@@ -251,7 +251,7 @@ func (s *session) SwapTabUp() {
 	s.activeTab--
 }
 
-func (s *session) SwapTabDown() {
+func (s *Session) SwapTabDown() {
 	if s.activeTab == len(s.tabs)-1 {
 		return
 	}
@@ -261,7 +261,7 @@ func (s *session) SwapTabDown() {
 	s.activeTab++
 }
 
-func (s *session) SelectTab(n int) {
+func (s *Session) SelectTab(n int) {
 	if len(s.tabs) == 0 || n < 0 {
 		return
 	}
@@ -295,7 +295,7 @@ type explorerTab struct {
 }
 
 func (t *explorerTab) title() string {
-	return "[Chose Files]"
+	return "[Choose Files]"
 }
 
 func (t *explorerTab) focus() {}
