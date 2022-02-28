@@ -37,22 +37,22 @@ type Editor struct {
 	active  action
 	history []action
 
-	eventKey    byte
-	reqSave     bool
-	reqFocus    bool
-	changed     bool
-	click       gesture.Click
+	eventKey byte
+	click    gesture.Click
+	reqFocus bool
+	reqSave  bool
+	changed  bool
+
+	maxSize     image.Point
+	shaper      text.Shaper
+	font        text.Font
+	textSize    unit.Value
+	palette     Palette
+	charWidth   int
+	lnHeight    int
+	lnNumSpace  int
 	highlighter highlighter
 	styles      styling
-
-	maxSize    image.Point
-	shaper     text.Shaper
-	font       text.Font
-	textSize   unit.Value
-	palette    Palette
-	charWidth  int
-	lnHeight   int
-	lnNumSpace int
 }
 
 func (ed *Editor) Layout(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Value, pal Palette) D {
