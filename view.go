@@ -169,7 +169,7 @@ func (vw *View) layDivider(gtx C, w layout.Widget) D {
 
 	vw.dividerDrag.Add(gtx.Ops)
 	vw.dividerClick.Add(gtx.Ops)
-	pointer.CursorNameOp{Name: pointer.CursorColResize}.Add(gtx.Ops)
+	pointer.CursorColResize.Add(gtx.Ops)
 	return dims
 }
 
