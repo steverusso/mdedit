@@ -77,7 +77,14 @@ func (ed *Editor) Layout(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Sp, 
 }
 
 func (ed *Editor) processEvents(gtx C) {
-	key.InputOp{Tag: &ed.eventKey}.Add(gtx.Ops)
+	const keySet = "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|U|X|Y|Z" +
+		"|" + "Ctrl-[E,R,S]" +
+		"|" + key.NameDeleteBackward +
+		"|" + key.NameDeleteForward +
+		"|" + key.NameEscape +
+		"|" + key.NameReturn
+
+	key.InputOp{Tag: &ed.eventKey, Keys: keySet}.Add(gtx.Ops)
 	switch ed.mode {
 	case modeNormal:
 		ed.processNormalEvents(gtx)
