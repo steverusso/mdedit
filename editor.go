@@ -5,7 +5,6 @@ import (
 	"image"
 	"image/color"
 
-	"gioui.org/f32"
 	"gioui.org/gesture"
 	"gioui.org/io/key"
 	"gioui.org/layout"
@@ -277,7 +276,7 @@ func (ed *Editor) layLines(gtx C) D {
 	// Draw each line of text.
 	for row := ed.buf.vision.y; row < min(bufLineTotal, botIndex); row++ {
 		gtx.Constraints.Min = image.Point{}
-		vertOffset := op.Offset(f32.Point{Y: float32(yOffset)}).Push(gtx.Ops)
+		vertOffset := op.Offset(image.Point{Y: yOffset}).Push(gtx.Ops)
 		ed.drawLineNumber(gtx, row)
 
 		xOffset := ed.lnNumSpace + ed.charWidth // Start the line's text after the line number.
@@ -309,7 +308,7 @@ func (ed *Editor) layLines(gtx C) D {
 				fg, fnt = ed.styleBreakdown(nil)
 			}
 
-			xOffsetOp := op.Offset(f32.Point{X: float32(xOffset)}).Push(gtx.Ops)
+			xOffsetOp := op.Offset(image.Point{X: xOffset}).Push(gtx.Ops)
 			if ed.buf.cursor.is(row, segBegin) {
 				segEnd = segBegin + 1
 				rect := clip.Rect{Max: image.Point{ed.charWidth, gtx.Px(ed.textSize)}}
@@ -328,7 +327,7 @@ func (ed *Editor) layLines(gtx C) D {
 
 		// Draw the cursor if it's after the last character on the line.
 		if ed.buf.cursor.is(row, segBegin) {
-			xOffsetOp := op.Offset(f32.Point{X: float32(xOffset)}).Push(gtx.Ops)
+			xOffsetOp := op.Offset(image.Point{X: xOffset}).Push(gtx.Ops)
 			rect := clip.Rect{Max: image.Point{ed.charWidth, gtx.Px(ed.textSize)}}
 			paint.FillShape(gtx.Ops, ed.palette.Fg, rect.Op())
 			xOffsetOp.Pop()
@@ -340,7 +339,7 @@ func (ed *Editor) layLines(gtx C) D {
 
 	// The blank lines (if any).
 	for row := bufLineTotal; row < botIndex; row++ {
-		t := op.Offset(f32.Point{Y: float32(yOffset)}).Push(gtx.Ops)
+		t := op.Offset(image.Point{Y: yOffset}).Push(gtx.Ops)
 		clr := ed.palette.ListMarker
 		clr.A = 100
 		paint.ColorOp{Color: clr}.Add(gtx.Ops)

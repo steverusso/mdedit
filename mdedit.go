@@ -4,7 +4,6 @@ import (
 	"image"
 	"image/color"
 
-	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
@@ -165,9 +164,9 @@ func (g buttonGroup) layout(gtx C, buttons []groupButton) D {
 	fullDraw := m.Stop()
 	// Clip the rounded rectangle area and draw the button group.
 	defer clip.RRect{
-		Rect: f32.Rectangle{Max: f32.Point{
-			X: float32(fullDims.Size.X),
-			Y: float32(fullDims.Size.Y),
+		Rect: image.Rectangle{Max: image.Point{
+			X: fullDims.Size.X - 1,
+			Y: fullDims.Size.Y - 1,
 		}},
 		SE: radius, SW: radius, NW: radius, NE: radius,
 	}.Push(gtx.Ops).Pop()
@@ -195,7 +194,7 @@ func (g *buttonGroup) drawButtonWithBg(gtx C, b groupButton, height int) D {
 	size := image.Point{X: dims.Size.X, Y: height}
 	paint.FillShape(gtx.Ops, bg, clip.Rect{Max: size}.Op())
 	// Vertically center the button content.
-	defer op.Offset(f32.Point{Y: float32(height/2) - float32(dims.Size.Y/2)}).Push(gtx.Ops).Pop()
+	defer op.Offset(image.Point{Y: height/2 - dims.Size.Y/2}).Push(gtx.Ops).Pop()
 	return b.click.Layout(gtx, func(gtx C) D {
 		call.Add(gtx.Ops)
 		return D{Size: size}
