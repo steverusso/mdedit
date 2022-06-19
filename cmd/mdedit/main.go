@@ -16,7 +16,6 @@ import (
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/op"
-	"gioui.org/op/paint"
 	"gioui.org/widget/material"
 	"github.com/steverusso/mdedit"
 	"github.com/steverusso/mdedit/fonts"
@@ -108,7 +107,6 @@ func run() error {
 		case system.FrameEvent:
 			start := time.Now()
 			gtx := layout.NewContext(&ops, e)
-			paint.Fill(gtx.Ops, th.Palette.Bg)
 			s.Layout(gtx, th)
 			e.Frame(gtx.Ops)
 			log.Println(time.Now().Sub(start))

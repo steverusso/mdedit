@@ -50,6 +50,7 @@ func NewSession(fsys FS, win *app.Window) Session {
 }
 
 func (s *Session) Layout(gtx C, th *material.Theme) D {
+	paint.Fill(gtx.Ops, th.Bg)
 	if len(s.tabs) == 0 {
 		return layout.Center.Layout(gtx, func(gtx C) D {
 			return material.Body1(th, "Use Ctrl-O to open a file!").Layout(gtx)
