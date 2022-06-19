@@ -13,7 +13,6 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/text"
-	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"gioui.org/x/richtext"
@@ -46,7 +45,7 @@ func (d *Document) Layout(gtx C, th *material.Theme) D {
 	if d.elemList.Axis != layout.Vertical {
 		d.elemList.Axis = layout.Vertical
 	}
-	return layout.Inset{Left: unit.Dp(15), Right: unit.Dp(10)}.Layout(gtx, func(gtx C) D {
+	return layout.Inset{Left: 15, Right: 10}.Layout(gtx, func(gtx C) D {
 		return material.List(th, &d.elemList).Layout(gtx, len(d.elements), func(gtx C, i int) D {
 			return d.layBlock(gtx, th, &d.elements[i])
 		})
@@ -54,7 +53,7 @@ func (d *Document) Layout(gtx C, th *material.Theme) D {
 }
 
 func (d *Document) layBlock(gtx C, th *material.Theme, blk *spanGroup) D {
-	return layout.Inset{Bottom: unit.Dp(24)}.Layout(gtx, func(gtx C) D {
+	return layout.Inset{Bottom: 24}.Layout(gtx, func(gtx C) D {
 		switch blk.mdata.(type) {
 		case isHr:
 			size := image.Point{gtx.Constraints.Max.X, 1}
@@ -63,7 +62,7 @@ func (d *Document) layBlock(gtx C, th *material.Theme, blk *spanGroup) D {
 			return D{Size: size}
 		case isFencedCodeBlock:
 			m := op.Record(gtx.Ops)
-			dims := layout.UniformInset(unit.Dp(15)).Layout(gtx, func(gtx C) D {
+			dims := layout.UniformInset(15).Layout(gtx, func(gtx C) D {
 				return richtext.Text(&d.textState, th.Shaper, blk.items...).Layout(gtx)
 			})
 			call := m.Stop()
@@ -78,7 +77,7 @@ func (d *Document) layBlock(gtx C, th *material.Theme, blk *spanGroup) D {
 			call := m.Stop()
 			return layout.Flex{}.Layout(gtx,
 				layout.Rigid(func(gtx C) D {
-					return layout.Inset{Left: unit.Dp(5), Right: unit.Dp(15)}.Layout(gtx, func(gtx C) D {
+					return layout.Inset{Left: 5, Right: 15}.Layout(gtx, func(gtx C) D {
 						size := image.Point{4, dims.Size.Y}
 						rect := clip.Rect{Max: size}.Op()
 						paint.FillShape(gtx.Ops, color.NRGBA{120, 120, 120, 255}, rect)

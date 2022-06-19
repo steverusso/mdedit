@@ -17,7 +17,6 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/paint"
-	"gioui.org/unit"
 	"gioui.org/widget/material"
 	"github.com/steverusso/mdedit"
 	"github.com/steverusso/mdedit/fonts"
@@ -77,13 +76,13 @@ func (_ *diskFS) WriteFile(fpath string, data []byte) error {
 
 func run() error {
 	win := app.NewWindow(
-		app.Size(unit.Dp(1500), unit.Dp(900)),
+		app.Size(1500, 900),
 		app.Title("MdEdit"),
 	)
 	win.Perform(system.ActionCenter)
 
 	th := material.NewTheme(fonts.UbuntuFontCollection)
-	th.TextSize = unit.Dp(17)
+	th.TextSize = 17
 	th.Palette = material.Palette{
 		Bg:         color.NRGBA{17, 21, 24, 255},
 		Fg:         color.NRGBA{235, 235, 235, 255},

@@ -45,7 +45,7 @@ type Editor struct {
 	maxSize     image.Point
 	shaper      text.Shaper
 	font        text.Font
-	textSize    unit.Value
+	textSize    unit.Sp
 	palette     Palette
 	charWidth   int
 	lnHeight    int
@@ -54,7 +54,7 @@ type Editor struct {
 	styles      styling
 }
 
-func (ed *Editor) Layout(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Value, pal Palette) D {
+func (ed *Editor) Layout(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Sp, pal Palette) D {
 	ed.ensure(gtx, sh, fnt, txtSize, pal)
 
 	defer clip.Rect(image.Rectangle{Max: gtx.Constraints.Max}).Push(gtx.Ops).Pop()
@@ -71,7 +71,7 @@ func (ed *Editor) Layout(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Valu
 	}
 
 	ed.processEvents(gtx)
-	return layout.Inset{Left: unit.Dp(5)}.Layout(gtx, func(gtx C) D {
+	return layout.Inset{Left: 5}.Layout(gtx, func(gtx C) D {
 		return ed.layLines(gtx)
 	})
 }
@@ -311,7 +311,7 @@ func (ed *Editor) layLines(gtx C) D {
 			xOffsetOp := op.Offset(image.Point{X: xOffset}).Push(gtx.Ops)
 			if ed.buf.cursor.is(row, segBegin) {
 				segEnd = segBegin + 1
-				rect := clip.Rect{Max: image.Point{ed.charWidth, gtx.Px(ed.textSize)}}
+				rect := clip.Rect{Max: image.Point{ed.charWidth, gtx.Sp(ed.textSize)}}
 				paint.FillShape(gtx.Ops, fg, rect.Op())
 				paint.ColorOp{Color: ed.palette.Bg}.Add(gtx.Ops)
 			} else {
@@ -328,7 +328,7 @@ func (ed *Editor) layLines(gtx C) D {
 		// Draw the cursor if it's after the last character on the line.
 		if ed.buf.cursor.is(row, segBegin) {
 			xOffsetOp := op.Offset(image.Point{X: xOffset}).Push(gtx.Ops)
-			rect := clip.Rect{Max: image.Point{ed.charWidth, gtx.Px(ed.textSize)}}
+			rect := clip.Rect{Max: image.Point{ed.charWidth, gtx.Sp(ed.textSize)}}
 			paint.FillShape(gtx.Ops, ed.palette.Fg, rect.Op())
 			xOffsetOp.Pop()
 		}
@@ -433,7 +433,7 @@ func (ed *Editor) HasChanged() bool {
 	return v
 }
 
-func (ed *Editor) ensure(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Value, pal Palette) {
+func (ed *Editor) ensure(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Sp, pal Palette) {
 	if ed.shaper != sh {
 		ed.shaper = sh
 	}
@@ -444,11 +444,11 @@ func (ed *Editor) ensure(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Valu
 		const lnPadding = 1
 		ed.maxSize = gtx.Constraints.Max
 		ed.textSize = txtSize
-		ed.lnHeight = gtx.Px(txtSize) + lnPadding
+		ed.lnHeight = gtx.Sp(txtSize) + lnPadding
 		ed.buf.vision.h = ed.maxSize.Y / ed.lnHeight
 		// Determine character width and, from that, the width that will be used for the line numbers.
-		textSize := fixed.I(gtx.Px(txtSize))
-		lines := sh.LayoutString(fnt, textSize, ed.maxSize.X, " ")
+		textSize := fixed.I(gtx.Sp(txtSize))
+		lines := sh.LayoutString(fnt, textSize, ed.maxSize.X, gtx.Locale, " ")
 		ed.charWidth = lines[0].Width.Ceil()
 		ed.lnNumSpace = ed.charWidth * max(2, len(fmt.Sprint(len(ed.buf.lines))))
 	}

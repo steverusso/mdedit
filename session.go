@@ -16,7 +16,6 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/text"
-	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 )
@@ -78,7 +77,7 @@ func (s *Session) Layout(gtx C, th *material.Theme) D {
 				// Record the layout in order to get the size for filling the background.
 				m := op.Record(gtx.Ops)
 				dims := t.btn.Layout(gtx, func(gtx C) D {
-					return layout.UniformInset(unit.Dp(5)).Layout(gtx, lbl.Layout)
+					return layout.UniformInset(5).Layout(gtx, lbl.Layout)
 				})
 				call := m.Stop()
 				// Fill the background and draw the tab button.

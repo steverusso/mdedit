@@ -109,7 +109,7 @@ type buttonGroup struct {
 	bg       color.NRGBA
 	fg       color.NRGBA
 	shaper   text.Shaper
-	textSize unit.Value
+	textSize unit.Sp
 }
 
 type groupButton struct {
@@ -156,8 +156,8 @@ func (g buttonGroup) layout(gtx C, buttons []groupButton) D {
 	m := op.Record(gtx.Ops)
 	fullDims := widget.Border{
 		Color:        border,
-		CornerRadius: unit.Dp(radius),
-		Width:        unit.Dp(1),
+		CornerRadius: radius,
+		Width:        1,
 	}.Layout(gtx, func(gtx C) D {
 		return layout.Flex{}.Layout(gtx, flexBtns...)
 	})
@@ -215,12 +215,12 @@ func (g *buttonGroup) drawButton(gtx C, b groupButton) D {
 	case b.text != "":
 		content = func(gtx C) D {
 			paint.ColorOp{Color: fg}.Add(gtx.Ops)
-			return layout.Inset{Left: unit.Dp(2), Right: unit.Dp(2)}.Layout(gtx, func(gtx C) D {
+			return layout.Inset{Left: 2, Right: 2}.Layout(gtx, func(gtx C) D {
 				return widget.Label{MaxLines: 1}.Layout(gtx, g.shaper, text.Font{}, g.textSize, b.text)
 			})
 		}
 	default:
 		return D{}
 	}
-	return layout.UniformInset(unit.Dp(6)).Layout(gtx, content)
+	return layout.UniformInset(6).Layout(gtx, content)
 }
