@@ -119,8 +119,8 @@ func (s *Session) layMarkdownTab(gtx C, th *material.Theme, t *markdownTab) D {
 		Theme:      th,
 		EditorFont: text.Font{Variant: "Mono"},
 		Palette: Palette{
-			Fg:         th.Palette.Fg,
-			Bg:         th.Palette.Bg,
+			Fg:         th.Fg,
+			Bg:         th.Bg,
 			LineNumber: color.NRGBA{200, 180, 4, 125},
 			Heading:    color.NRGBA{200, 193, 255, 255},
 			ListMarker: color.NRGBA{10, 190, 240, 255},

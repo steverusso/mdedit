@@ -307,7 +307,7 @@ func (en *explEntry) update(gtx C) {
 
 func (en *explEntry) draw(gtx C, th *material.Theme) D {
 	icon := func(gtx C) D {
-		return en.icon.Layout(gtx, th.Palette.Fg)
+		return en.icon.Layout(gtx, th.Fg)
 	}
 	name := material.Body2(th, en.info.Name())
 	lastmod := material.Body2(th, en.lastmod)
