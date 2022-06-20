@@ -8,8 +8,6 @@ import (
 	"io/fs"
 	"log"
 	"os"
-	"strconv"
-	"strings"
 	"time"
 
 	"gioui.org/app"
@@ -116,7 +114,7 @@ func run() error {
 			// Process any key events since the previous frame.
 			for _, ke := range gtx.Events(win) {
 				if ke, ok := ke.(key.Event); ok {
-					handleKeyEvent(&s, ke)
+					s.HandleKeyEvent(ke)
 				}
 			}
 			// Gather key input on the entire window area.
@@ -129,38 +127,6 @@ func run() error {
 			log.Println(time.Now().Sub(start))
 		case system.DestroyEvent:
 			return e.Err
-		}
-	}
-}
-
-func handleKeyEvent(s *mdedit.Session, e key.Event) {
-	if e.State != key.Press {
-		return
-	}
-	switch e.Modifiers {
-	case key.ModCtrl:
-		switch e.Name {
-		case "O":
-			s.OpenFileExplorerTab()
-		case "W":
-			s.CloseActiveTab()
-		case key.NameTab:
-			s.NextTab()
-		}
-	case key.ModCtrl | key.ModShift:
-		switch e.Name {
-		case key.NamePageUp:
-			s.SwapTabUp()
-		case key.NamePageDown:
-			s.SwapTabDown()
-		case key.NameTab:
-			s.PrevTab()
-		}
-	case key.ModAlt:
-		if strings.Contains("123456789", e.Name) {
-			if n, err := strconv.Atoi(e.Name); err == nil {
-				s.SelectTab(n - 1)
-			}
 		}
 	}
 }

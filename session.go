@@ -9,8 +9,11 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
+	"strconv"
+	"strings"
 
 	"gioui.org/app"
+	"gioui.org/io/key"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
@@ -98,6 +101,38 @@ func (s *Session) Layout(gtx C, th *material.Theme) D {
 			return s.layTabContent(gtx, th, s.tabs[s.activeTab].content)
 		}),
 	)
+}
+
+func (s *Session) HandleKeyEvent(e key.Event) {
+	if e.State != key.Press {
+		return
+	}
+	switch e.Modifiers {
+	case key.ModCtrl:
+		switch e.Name {
+		case "O":
+			s.OpenFileExplorerTab()
+		case "W":
+			s.CloseActiveTab()
+		case key.NameTab:
+			s.NextTab()
+		}
+	case key.ModCtrl | key.ModShift:
+		switch e.Name {
+		case key.NamePageUp:
+			s.SwapTabUp()
+		case key.NamePageDown:
+			s.SwapTabDown()
+		case key.NameTab:
+			s.PrevTab()
+		}
+	case key.ModAlt:
+		if strings.Contains("123456789", e.Name) {
+			if n, err := strconv.Atoi(e.Name); err == nil {
+				s.SelectTab(n - 1)
+			}
+		}
+	}
 }
 
 func (s *Session) layTabContent(gtx C, th *material.Theme, t tabContent) D {
