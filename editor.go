@@ -5,7 +5,6 @@ import (
 	"image"
 	"image/color"
 
-	"gioui.org/f32"
 	"gioui.org/gesture"
 	"gioui.org/io/key"
 	"gioui.org/layout"
@@ -46,7 +45,7 @@ type Editor struct {
 	maxSize     image.Point
 	shaper      text.Shaper
 	font        text.Font
-	textSize    unit.Value
+	textSize    unit.Sp
 	palette     Palette
 	charWidth   int
 	lnHeight    int
@@ -55,7 +54,7 @@ type Editor struct {
 	styles      styling
 }
 
-func (ed *Editor) Layout(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Value, pal Palette) D {
+func (ed *Editor) Layout(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Sp, pal Palette) D {
 	ed.ensure(gtx, sh, fnt, txtSize, pal)
 
 	defer clip.Rect(image.Rectangle{Max: gtx.Constraints.Max}).Push(gtx.Ops).Pop()
@@ -72,13 +71,20 @@ func (ed *Editor) Layout(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Valu
 	}
 
 	ed.processEvents(gtx)
-	return layout.Inset{Left: unit.Dp(5)}.Layout(gtx, func(gtx C) D {
+	return layout.Inset{Left: 5}.Layout(gtx, func(gtx C) D {
 		return ed.layLines(gtx)
 	})
 }
 
 func (ed *Editor) processEvents(gtx C) {
-	key.InputOp{Tag: &ed.eventKey}.Add(gtx.Ops)
+	const keySet = "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|U|X|Y|Z" +
+		"|" + "Ctrl-[E,R,S]" +
+		"|" + key.NameDeleteBackward +
+		"|" + key.NameDeleteForward +
+		"|" + key.NameEscape +
+		"|" + key.NameReturn
+
+	key.InputOp{Tag: &ed.eventKey, Keys: keySet}.Add(gtx.Ops)
 	switch ed.mode {
 	case modeNormal:
 		ed.processNormalEvents(gtx)
@@ -277,7 +283,7 @@ func (ed *Editor) layLines(gtx C) D {
 	// Draw each line of text.
 	for row := ed.buf.vision.y; row < min(bufLineTotal, botIndex); row++ {
 		gtx.Constraints.Min = image.Point{}
-		vertOffset := op.Offset(f32.Point{Y: float32(yOffset)}).Push(gtx.Ops)
+		vertOffset := op.Offset(image.Point{Y: yOffset}).Push(gtx.Ops)
 		ed.drawLineNumber(gtx, row)
 
 		xOffset := ed.lnNumSpace + ed.charWidth // Start the line's text after the line number.
@@ -309,10 +315,10 @@ func (ed *Editor) layLines(gtx C) D {
 				fg, fnt = ed.styleBreakdown(nil)
 			}
 
-			xOffsetOp := op.Offset(f32.Point{X: float32(xOffset)}).Push(gtx.Ops)
+			xOffsetOp := op.Offset(image.Point{X: xOffset}).Push(gtx.Ops)
 			if ed.buf.cursor.is(row, segBegin) {
 				segEnd = segBegin + 1
-				rect := clip.Rect{Max: image.Point{ed.charWidth, gtx.Px(ed.textSize)}}
+				rect := clip.Rect{Max: image.Point{ed.charWidth, gtx.Sp(ed.textSize)}}
 				paint.FillShape(gtx.Ops, fg, rect.Op())
 				paint.ColorOp{Color: ed.palette.Bg}.Add(gtx.Ops)
 			} else {
@@ -328,8 +334,8 @@ func (ed *Editor) layLines(gtx C) D {
 
 		// Draw the cursor if it's after the last character on the line.
 		if ed.buf.cursor.is(row, segBegin) {
-			xOffsetOp := op.Offset(f32.Point{X: float32(xOffset)}).Push(gtx.Ops)
-			rect := clip.Rect{Max: image.Point{ed.charWidth, gtx.Px(ed.textSize)}}
+			xOffsetOp := op.Offset(image.Point{X: xOffset}).Push(gtx.Ops)
+			rect := clip.Rect{Max: image.Point{ed.charWidth, gtx.Sp(ed.textSize)}}
 			paint.FillShape(gtx.Ops, ed.palette.Fg, rect.Op())
 			xOffsetOp.Pop()
 		}
@@ -340,7 +346,7 @@ func (ed *Editor) layLines(gtx C) D {
 
 	// The blank lines (if any).
 	for row := bufLineTotal; row < botIndex; row++ {
-		t := op.Offset(f32.Point{Y: float32(yOffset)}).Push(gtx.Ops)
+		t := op.Offset(image.Point{Y: yOffset}).Push(gtx.Ops)
 		clr := ed.palette.ListMarker
 		clr.A = 100
 		paint.ColorOp{Color: clr}.Add(gtx.Ops)
@@ -434,7 +440,7 @@ func (ed *Editor) HasChanged() bool {
 	return v
 }
 
-func (ed *Editor) ensure(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Value, pal Palette) {
+func (ed *Editor) ensure(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Sp, pal Palette) {
 	if ed.shaper != sh {
 		ed.shaper = sh
 	}
@@ -445,11 +451,11 @@ func (ed *Editor) ensure(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Valu
 		const lnPadding = 1
 		ed.maxSize = gtx.Constraints.Max
 		ed.textSize = txtSize
-		ed.lnHeight = gtx.Px(txtSize) + lnPadding
+		ed.lnHeight = gtx.Sp(txtSize) + lnPadding
 		ed.buf.vision.h = ed.maxSize.Y / ed.lnHeight
 		// Determine character width and, from that, the width that will be used for the line numbers.
-		textSize := fixed.I(gtx.Px(txtSize))
-		lines := sh.LayoutString(fnt, textSize, ed.maxSize.X, " ")
+		textSize := fixed.I(gtx.Sp(txtSize))
+		lines := sh.LayoutString(fnt, textSize, ed.maxSize.X, gtx.Locale, " ")
 		ed.charWidth = lines[0].Width.Ceil()
 		ed.lnNumSpace = ed.charWidth * max(2, len(fmt.Sprint(len(ed.buf.lines))))
 	}

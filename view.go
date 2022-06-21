@@ -11,7 +11,6 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/text"
-	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 )
@@ -117,7 +116,7 @@ func (vw *View) laySplitView(gtx C, th *material.Theme, edFnt text.Font, pal Pal
 
 	m := op.Record(gtx.Ops)
 	dims := vw.layDivider(gtx, func(gtx C) D {
-		return layout.Inset{Left: unit.Dp(3), Right: unit.Dp(3)}.Layout(gtx, separator{
+		return layout.Inset{Left: 3, Right: 3}.Layout(gtx, separator{
 			width:    2,
 			color:    color.NRGBA{90, 90, 90, 255},
 			vertical: true,
@@ -169,7 +168,7 @@ func (vw *View) layDivider(gtx C, w layout.Widget) D {
 
 	vw.dividerDrag.Add(gtx.Ops)
 	vw.dividerClick.Add(gtx.Ops)
-	pointer.CursorNameOp{Name: pointer.CursorColResize}.Add(gtx.Ops)
+	pointer.CursorColResize.Add(gtx.Ops)
 	return dims
 }
 
@@ -199,7 +198,7 @@ func (vw *View) layToolbar(gtx C, th *material.Theme) D {
 	}
 
 	m := op.Record(gtx.Ops)
-	dims := layout.UniformInset(unit.Dp(8)).Layout(gtx, func(gtx C) D {
+	dims := layout.UniformInset(8).Layout(gtx, func(gtx C) D {
 		return layout.Flex{Alignment: layout.Middle}.Layout(gtx,
 			layout.Flexed(1, func(gtx C) D {
 				return D{Size: image.Point{gtx.Constraints.Max.X, 1}}
@@ -226,7 +225,7 @@ func (vw *View) layToolbar(gtx C, th *material.Theme) D {
 					},
 				})
 			}),
-			layout.Rigid(layout.Spacer{Width: unit.Dp(8)}.Layout),
+			layout.Rigid(layout.Spacer{Width: 8}.Layout),
 			layout.Rigid(func(gtx C) D {
 				return buttonGroup{
 					bg:       merge(th.Bg, th.Fg, 0.08),

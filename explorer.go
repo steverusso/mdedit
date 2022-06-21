@@ -11,7 +11,6 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/text"
-	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 )
@@ -79,13 +78,13 @@ func (ex *Explorer) layTopbar(gtx C, th *material.Theme) D {
 			disabled: ex.currentDir == bc.path,
 		})
 	}
-	return layout.UniformInset(unit.Dp(5)).Layout(gtx, func(gtx C) D {
+	return layout.UniformInset(5).Layout(gtx, func(gtx C) D {
 		return ex.bcrumbList.Layout(gtx, 1, func(gtx C, i int) D {
 			return buttonGroup{
 				bg:       th.Bg,
 				fg:       th.Fg,
 				shaper:   th.Shaper,
-				textSize: th.TextSize.Scale(0.9),
+				textSize: th.TextSize * 0.9,
 			}.layout(gtx, bcrumbBtns)
 		})
 	})
@@ -96,8 +95,8 @@ func (ex *Explorer) layEntryList(gtx C, th *material.Theme) D {
 		return layout.Center.Layout(gtx, material.Body1(th, "No files here!").Layout)
 	}
 	headers := func(gtx C) D {
-		sp := layout.Spacer{Width: unit.Dp(5)}.Layout
-		return layout.UniformInset(unit.Dp(8)).Layout(gtx, func(gtx C) D {
+		sp := layout.Spacer{Width: 5}.Layout
+		return layout.UniformInset(8).Layout(gtx, func(gtx C) D {
 			return layout.Flex{}.Layout(gtx,
 				layout.Flexed(1, headerLbl(th, "Name")),
 				layout.Rigid(sp),
@@ -308,15 +307,15 @@ func (en *explEntry) update(gtx C) {
 
 func (en *explEntry) draw(gtx C, th *material.Theme) D {
 	icon := func(gtx C) D {
-		return en.icon.Layout(gtx, th.Palette.Fg)
+		return en.icon.Layout(gtx, th.Fg)
 	}
 	name := material.Body2(th, en.info.Name())
 	lastmod := material.Body2(th, en.lastmod)
 	if !en.selected && !en.click.Hovered() {
 		lastmod.Color.A /= 4
 	}
-	return layout.Inset{Top: unit.Dp(2), Bottom: unit.Dp(2)}.Layout(gtx, func(gtx C) D {
-		sp := layout.Spacer{Width: unit.Dp(10)}.Layout
+	return layout.Inset{Top: 2, Bottom: 2}.Layout(gtx, func(gtx C) D {
+		sp := layout.Spacer{Width: 10}.Layout
 		return layout.Flex{Alignment: layout.Middle}.Layout(gtx,
 			layout.Rigid(sp),
 			layout.Rigid(icon),

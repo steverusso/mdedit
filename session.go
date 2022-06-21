@@ -9,14 +9,16 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
+	"strconv"
+	"strings"
 
 	"gioui.org/app"
+	"gioui.org/io/key"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/text"
-	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 )
@@ -51,6 +53,7 @@ func NewSession(fsys FS, win *app.Window) Session {
 }
 
 func (s *Session) Layout(gtx C, th *material.Theme) D {
+	paint.Fill(gtx.Ops, th.Bg)
 	if len(s.tabs) == 0 {
 		return layout.Center.Layout(gtx, func(gtx C) D {
 			return material.Body1(th, "Use Ctrl-O to open a file!").Layout(gtx)
@@ -78,7 +81,7 @@ func (s *Session) Layout(gtx C, th *material.Theme) D {
 				// Record the layout in order to get the size for filling the background.
 				m := op.Record(gtx.Ops)
 				dims := t.btn.Layout(gtx, func(gtx C) D {
-					return layout.UniformInset(unit.Dp(5)).Layout(gtx, lbl.Layout)
+					return layout.UniformInset(5).Layout(gtx, lbl.Layout)
 				})
 				call := m.Stop()
 				// Fill the background and draw the tab button.
@@ -100,6 +103,38 @@ func (s *Session) Layout(gtx C, th *material.Theme) D {
 	)
 }
 
+func (s *Session) HandleKeyEvent(e key.Event) {
+	if e.State != key.Press {
+		return
+	}
+	switch e.Modifiers {
+	case key.ModCtrl:
+		switch e.Name {
+		case "O":
+			s.OpenFileExplorerTab()
+		case "W":
+			s.CloseActiveTab()
+		case key.NameTab:
+			s.NextTab()
+		}
+	case key.ModCtrl | key.ModShift:
+		switch e.Name {
+		case key.NamePageUp:
+			s.SwapTabUp()
+		case key.NamePageDown:
+			s.SwapTabDown()
+		case key.NameTab:
+			s.PrevTab()
+		}
+	case key.ModAlt:
+		if strings.Contains("123456789", e.Name) {
+			if n, err := strconv.Atoi(e.Name); err == nil {
+				s.SelectTab(n - 1)
+			}
+		}
+	}
+}
+
 func (s *Session) layTabContent(gtx C, th *material.Theme, t tabContent) D {
 	switch t := t.(type) {
 	case *markdownTab:
@@ -119,8 +154,8 @@ func (s *Session) layMarkdownTab(gtx C, th *material.Theme, t *markdownTab) D {
 		Theme:      th,
 		EditorFont: text.Font{Variant: "Mono"},
 		Palette: Palette{
-			Fg:         th.Palette.Fg,
-			Bg:         th.Palette.Bg,
+			Fg:         th.Fg,
+			Bg:         th.Bg,
 			LineNumber: color.NRGBA{200, 180, 4, 125},
 			Heading:    color.NRGBA{200, 193, 255, 255},
 			ListMarker: color.NRGBA{10, 190, 240, 255},

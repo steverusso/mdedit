@@ -3,12 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"image"
 	"image/color"
 	"io/fs"
 	"log"
 	"os"
-	"strconv"
-	"strings"
 	"time"
 
 	"gioui.org/app"
@@ -16,12 +15,15 @@ import (
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/op"
-	"gioui.org/op/paint"
-	"gioui.org/unit"
+	"gioui.org/op/clip"
 	"gioui.org/widget/material"
 	"github.com/steverusso/mdedit"
 	"github.com/steverusso/mdedit/fonts"
 )
+
+const topLevelKeySet = "Ctrl-[O,W," + key.NameTab + "]" +
+	"|Ctrl-Shift-[" + key.NamePageUp + "," + key.NamePageDown + "," + key.NameTab + "]" +
+	"|Alt-[1,2,3,4,5,6,7,8,9]"
 
 type diskFS struct {
 	homeDir    string
@@ -77,13 +79,13 @@ func (_ *diskFS) WriteFile(fpath string, data []byte) error {
 
 func run() error {
 	win := app.NewWindow(
-		app.Size(unit.Dp(1500), unit.Dp(900)),
+		app.Size(1500, 900),
 		app.Title("MdEdit"),
 	)
 	win.Perform(system.ActionCenter)
 
 	th := material.NewTheme(fonts.UbuntuFontCollection)
-	th.TextSize = unit.Dp(17)
+	th.TextSize = 17
 	th.Palette = material.Palette{
 		Bg:         color.NRGBA{17, 21, 24, 255},
 		Fg:         color.NRGBA{235, 235, 235, 255},
@@ -109,41 +111,20 @@ func run() error {
 		case system.FrameEvent:
 			start := time.Now()
 			gtx := layout.NewContext(&ops, e)
-			paint.Fill(gtx.Ops, th.Palette.Bg)
+			// Process any key events since the previous frame.
+			for _, ke := range gtx.Events(win) {
+				if ke, ok := ke.(key.Event); ok {
+					s.HandleKeyEvent(ke)
+				}
+			}
+			// Gather key input on the entire window area.
+			areaStack := clip.Rect(image.Rectangle{Max: gtx.Constraints.Max}).Push(gtx.Ops)
+			key.InputOp{Tag: win, Keys: topLevelKeySet}.Add(gtx.Ops)
 			s.Layout(gtx, th)
+			areaStack.Pop()
+
 			e.Frame(gtx.Ops)
 			log.Println(time.Now().Sub(start))
-		case key.Event:
-			if e.State != key.Press {
-				break
-			}
-			switch e.Modifiers {
-			case key.ModCtrl:
-				switch e.Name {
-				case "O":
-					s.OpenFileExplorerTab()
-				case "W":
-					s.CloseActiveTab()
-				case key.NameTab:
-					s.NextTab()
-				}
-			case key.ModCtrl | key.ModShift:
-				switch e.Name {
-				case key.NamePageUp:
-					s.SwapTabUp()
-				case key.NamePageDown:
-					s.SwapTabDown()
-				case key.NameTab:
-					s.PrevTab()
-				}
-			case key.ModAlt:
-				if strings.Contains("123456789", e.Name) {
-					if n, err := strconv.Atoi(e.Name); err == nil {
-						s.SelectTab(n - 1)
-					}
-				}
-			}
-			win.Invalidate()
 		case system.DestroyEvent:
 			return e.Err
 		}
