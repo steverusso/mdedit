@@ -116,7 +116,7 @@ func (vw *View) laySplitView(gtx C, th *material.Theme, edFnt text.Font, pal Pal
 
 	m := op.Record(gtx.Ops)
 	dims := vw.layDivider(gtx, func(gtx C) D {
-		return layout.Inset{Left: 3, Right: 3}.Layout(gtx, separator{
+		return layout.Inset{Left: 3, Right: 3}.Layout(gtx, rule{
 			width:    2,
 			color:    color.NRGBA{90, 90, 90, 255},
 			vertical: true,
@@ -239,7 +239,7 @@ func (vw *View) layToolbar(gtx C, th *material.Theme) D {
 	call := m.Stop()
 
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-		layout.Rigid(separator{
+		layout.Rigid(rule{
 			width: 2,
 			color: merge(th.Fg, th.Bg, 0.7),
 		}.Layout),
