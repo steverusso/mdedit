@@ -117,9 +117,9 @@ func (vw *View) laySplitView(gtx C, th *material.Theme, edFnt text.Font, pal Pal
 	m := op.Record(gtx.Ops)
 	dims := vw.layDivider(gtx, func(gtx C) D {
 		return layout.Inset{Left: 3, Right: 3}.Layout(gtx, rule{
-			width:    2,
-			color:    color.NRGBA{90, 90, 90, 255},
-			vertical: true,
+			width: 2,
+			color: color.NRGBA{90, 90, 90, 255},
+			axis:  layout.Vertical,
 		}.Layout)
 	})
 	c := m.Stop()

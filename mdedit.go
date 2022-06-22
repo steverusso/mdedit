@@ -87,9 +87,9 @@ func mergeCalc(a, b uint8, p float32) uint8 {
 }
 
 type rule struct {
-	width    int
-	color    color.NRGBA
-	vertical bool
+	width int
+	color color.NRGBA
+	axis  layout.Axis
 }
 
 func (rl rule) Layout(gtx C) D {
@@ -97,7 +97,7 @@ func (rl rule) Layout(gtx C) D {
 		rl.width = 1
 	}
 	size := image.Point{gtx.Constraints.Max.X, rl.width}
-	if rl.vertical {
+	if rl.axis == layout.Vertical {
 		size = image.Point{rl.width, gtx.Constraints.Max.Y}
 	}
 	rect := clip.Rect{Max: size}.Op()
@@ -139,7 +139,7 @@ func (g buttonGroup) layout(gtx C, buttons []groupButton) D {
 	border := merge(g.fg, g.bg, 0.3)
 	divider := func(gtx C) D {
 		gtx.Constraints.Max.Y = maxHeight
-		return rule{color: border, vertical: true}.Layout(gtx)
+		return rule{color: border, axis: layout.Vertical}.Layout(gtx)
 	}
 	flexBtns := make([]layout.FlexChild, 0, len(buttons)*2)
 	for i := 0; i < len(buttons); i++ {
