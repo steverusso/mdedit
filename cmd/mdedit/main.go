@@ -22,10 +22,6 @@ import (
 )
 
 const topLevelKeySet = "Ctrl-[O,W," + key.NameTab + "]" +
-
-
-
-
 	"|Ctrl-Shift-[" + key.NamePageUp + "," + key.NamePageDown + "," + key.NameTab + "]" +
 	"|Alt-[1,2,3,4,5,6,7,8,9]"
 
