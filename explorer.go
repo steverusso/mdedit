@@ -44,7 +44,7 @@ func (ex *Explorer) Layout(gtx C, th *material.Theme) D {
 		layout.Rigid(func(gtx C) D {
 			return ex.layTopbar(gtx, th)
 		}),
-		layout.Rigid(separator{width: 1, color: th.Fg}.Layout),
+		layout.Rigid(rule{width: 1, color: th.Fg}.Layout),
 		layout.Flexed(1, func(gtx C) D {
 			return ex.layEntryList(gtx, th)
 		}),
@@ -129,7 +129,7 @@ func (ex *Explorer) layEntryList(gtx C, th *material.Theme) D {
 	}
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 		layout.Rigid(headers),
-		layout.Rigid(separator{width: 1, color: th.Fg}.Layout),
+		layout.Rigid(rule{width: 1, color: th.Fg}.Layout),
 		layout.Flexed(1, entryList),
 	)
 }
