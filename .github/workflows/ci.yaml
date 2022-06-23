@@ -32,7 +32,11 @@ jobs:
       run: goimports -w . && gofumpt -w .
 
     - name: Verify
-      run: d="$(git diff)"; [ -n "$d" ] && echo $d && exit 1
+      run: |
+        if [ -n "$(git diff)" ]; then
+          git diff
+          exit 1
+        fi
 
     - name: Test
       run: go test -v ./...
