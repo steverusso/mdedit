@@ -8,14 +8,38 @@ import (
 )
 
 var UbuntuFontCollection = []text.FontFace{
-	{text.Font{}, fontMust(ubuntuTTF)},
-	{text.Font{Style: text.Italic}, fontMust(ubuntuItalicTTF)},
-	{text.Font{Weight: text.Bold}, fontMust(ubuntuBoldTTF)},
-	{text.Font{Weight: text.Medium}, fontMust(ubuntuMediumTTF)},
-	{text.Font{Variant: "Mono"}, fontMust(ubuntuMonoTTF)},
-	{text.Font{Variant: "Mono", Style: text.Italic}, fontMust(ubuntuMonoItalicTTF)},
-	{text.Font{Variant: "Mono", Weight: text.Bold}, fontMust(ubuntuMonoBoldTTF)},
-	{text.Font{Variant: "Mono", Weight: text.Bold, Style: text.Italic}, fontMust(ubuntuMonoBoldItalicTTF)},
+	{
+		Font: text.Font{},
+		Face: fontMust(ubuntuTTF),
+	},
+	{
+		Font: text.Font{Style: text.Italic},
+		Face: fontMust(ubuntuItalicTTF),
+	},
+	{
+		Font: text.Font{Weight: text.Bold},
+		Face: fontMust(ubuntuBoldTTF),
+	},
+	{
+		Font: text.Font{Weight: text.Medium},
+		Face: fontMust(ubuntuMediumTTF),
+	},
+	{
+		Font: text.Font{Variant: "Mono"},
+		Face: fontMust(ubuntuMonoTTF),
+	},
+	{
+		Font: text.Font{Variant: "Mono", Style: text.Italic},
+		Face: fontMust(ubuntuMonoItalicTTF),
+	},
+	{
+		Font: text.Font{Variant: "Mono", Weight: text.Bold},
+		Face: fontMust(ubuntuMonoBoldTTF),
+	},
+	{
+		Font: text.Font{Variant: "Mono", Weight: text.Bold, Style: text.Italic},
+		Face: fontMust(ubuntuMonoBoldItalicTTF),
+	},
 }
 
 // fontMust parses the given font and panics if unable to do so.
