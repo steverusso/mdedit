@@ -22,10 +22,14 @@ jobs:
     - name: Build
       run: go build -v ./...
 
+    - name: Install goimports
+      run: go install golang.org/x/tools/cmd/goimports@latest
+
+    - name: Install gofumpt
+      run: go install mvdan.cc/gofumpt@latest
+
     - name: Format
       run: |
-        go install golang.org/x/tools/cmd/goimports@latest
-        go install mvdan.cc/gofumpt@latest
         goimports -w .
         gofumpt -w .
         d="$(git diff)"; [ -n "$d" ] && echo $d && exit 1
