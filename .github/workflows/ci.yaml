@@ -29,10 +29,10 @@ jobs:
       run: go install mvdan.cc/gofumpt@latest
 
     - name: Format
-      run: |
-        goimports -w .
-        gofumpt -w .
-        d="$(git diff)"; [ -n "$d" ] && echo $d && exit 1
+      run: goimports -w . && gofumpt -w .
+
+    - name: Verify
+      run: d="$(git diff)"; [ -n "$d" ] && echo $d && exit 1
 
     - name: Test
       run: go test -v ./...
