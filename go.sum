@@ -18,6 +18,8 @@ github.com/gioui/uax v0.2.1-0.20220819135011-cda973fac06d h1:ro1W5kY1pVBLHy4GokZ
 github.com/gioui/uax v0.2.1-0.20220819135011-cda973fac06d/go.mod h1:b6uGh9ySJPVQG/RdiI88bE5sUGDk6vzzRujv1BAeuJc=
 github.com/go-text/typesetting v0.0.0-20220919164209-53347960f378 h1:zQuHC+OvuqO+oiIFvsskZJm7T2xCLKGQWtb0Z4/Majc=
 github.com/go-text/typesetting v0.0.0-20220919164209-53347960f378/go.mod h1:HrvxunLiLuKzlwtOZA1va1ZicCmf/PSzwacn9XVDQZs=
+github.com/steverusso/giofonts v0.0.0-20221008204946-6571191e2797 h1:wgyqjsJoCgWzt+TQkSfJHM6aMsrTU1KAjr+FpY3T+Xw=
+github.com/steverusso/giofonts v0.0.0-20221008204946-6571191e2797/go.mod h1:cZdekKUT0qXGuYbjuNrq5oPfB4QvIbaMPz12lLbnKxE=
 github.com/yuin/goldmark v1.5.2 h1:ALmeCk/px5FSm1MAcFBAsVKZjDuMVj8Tm7FFIlMJnqU=
 github.com/yuin/goldmark v1.5.2/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 golang.org/x/exp/shiny v0.0.0-20221006183845-316c7553db56 h1:e2meksHG9qvHAb6sm+7DLAuFAfOOB3gxlLPb/RVm22c=

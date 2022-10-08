@@ -17,8 +17,8 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/widget/material"
+	"github.com/steverusso/giofonts/ubuntu"
 	"github.com/steverusso/mdedit"
-	"github.com/steverusso/mdedit/fonts"
 )
 
 const topLevelKeySet = "Ctrl-[O,W," + key.NameTab + "]" +
@@ -84,7 +84,7 @@ func run() error {
 	)
 	win.Perform(system.ActionCenter)
 
-	th := material.NewTheme(fonts.UbuntuFontCollection)
+	th := material.NewTheme(ubuntu.Collection())
 	th.TextSize = 17
 	th.Palette = material.Palette{
 		Bg:         color.NRGBA{17, 21, 24, 255},

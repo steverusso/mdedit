@@ -16,6 +16,7 @@ require (
 	github.com/benoitkugler/textlayout v0.2.0 // indirect
 	github.com/gioui/uax v0.2.1-0.20220819135011-cda973fac06d // indirect
 	github.com/go-text/typesetting v0.0.0-20220919164209-53347960f378 // indirect
+	github.com/steverusso/giofonts v0.0.0-20221008204946-6571191e2797 // indirect
 	golang.org/x/sys v0.0.0-20221006211917-84dc82d7e875 // indirect
 	golang.org/x/text v0.3.7 // indirect
 )
