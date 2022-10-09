@@ -9,7 +9,7 @@ fmt:
 	@gofumpt -w -l .
 
 lint:
-	@go vet
+	@go vet ./...
 
 with-wayland: fmt lint
 	@go build -o mdedit cmd/mdedit/main.go
