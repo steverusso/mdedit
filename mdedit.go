@@ -34,18 +34,18 @@ type (
 )
 
 var (
-	iconDirectory  = iconMust(icons.FileFolderOpen)
-	iconEdit       = iconMust(icons.EditorModeEdit)
-	iconHome       = iconMust(icons.ActionHome)
-	iconReader     = iconMust(icons.ActionChromeReaderMode)
-	iconRegFile    = iconMust(icons.ActionDescription)
-	iconVisibility = iconMust(icons.ActionVisibility)
-	iconUnknown    = iconMust(icons.ContentBlock)
-	iconWebAsset   = iconMust(icons.AVWebAsset)
+	iconDirectory  = mustIcon(icons.FileFolderOpen)
+	iconEdit       = mustIcon(icons.EditorModeEdit)
+	iconHome       = mustIcon(icons.ActionHome)
+	iconReader     = mustIcon(icons.ActionChromeReaderMode)
+	iconRegFile    = mustIcon(icons.ActionDescription)
+	iconVisibility = mustIcon(icons.ActionVisibility)
+	iconUnknown    = mustIcon(icons.ContentBlock)
+	iconWebAsset   = mustIcon(icons.AVWebAsset)
 )
 
-// iconMust returns a new `*widget.Icon` for the given byte slice. It panics on error.
-func iconMust(iconBytes []byte) *widget.Icon {
+// mustIcon returns a new `*widget.Icon` for the given byte slice. It panics on error.
+func mustIcon(iconBytes []byte) *widget.Icon {
 	ic, err := widget.NewIcon(iconBytes)
 	if err != nil {
 		panic(err)
