@@ -1,22 +1,22 @@
 module github.com/steverusso/mdedit
 
-go 1.17
+go 1.19
 
 require (
-	gioui.org v0.0.0-20221004231135-80196f3c3ed3
-	gioui.org/x v0.0.0-20220919203322-ce11c01a7117
-	github.com/yuin/goldmark v1.5.2
-	golang.org/x/exp/shiny v0.0.0-20221006183845-316c7553db56
-	golang.org/x/image v0.0.0-20220902085622-e7cb96979f69
+	gioui.org v0.0.0-20221109144551-4f5a6b321284
+	gioui.org/x v0.0.0-20221110201648-c0c92248522e
+	github.com/steverusso/giofonts v0.0.0-20221114043900-227d6a023e75
+	github.com/yuin/goldmark v1.5.3
+	golang.org/x/exp/shiny v0.0.0-20221114191408-850992195362
+	golang.org/x/image v0.1.0
 )
 
 require (
-	gioui.org/cpu v0.0.0-20220412190645-f1e9e8c3b1f7 // indirect
+	gioui.org/cpu v0.0.0-20210817075930-8d6a761490d2 // indirect
 	gioui.org/shader v1.0.6 // indirect
-	github.com/benoitkugler/textlayout v0.2.0 // indirect
+	github.com/benoitkugler/textlayout v0.1.3 // indirect
 	github.com/gioui/uax v0.2.1-0.20220819135011-cda973fac06d // indirect
-	github.com/go-text/typesetting v0.0.0-20220919164209-53347960f378 // indirect
-	github.com/steverusso/giofonts v0.0.0-20221008204946-6571191e2797 // indirect
-	golang.org/x/sys v0.0.0-20221006211917-84dc82d7e875 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	github.com/go-text/typesetting v0.0.0-20220411150340-35994bc27a7b // indirect
+	golang.org/x/sys v0.0.0-20220825204002-c680a09ffe64 // indirect
+	golang.org/x/text v0.4.0 // indirect
 )
