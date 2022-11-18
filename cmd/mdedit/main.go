@@ -17,7 +17,7 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/widget/material"
-	"github.com/steverusso/giofonts/ubuntu"
+	"github.com/steverusso/gio-fonts/ubuntu"
 	"github.com/steverusso/mdedit"
 )
 
