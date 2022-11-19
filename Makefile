@@ -11,5 +11,8 @@ fmt:
 lint:
 	@go vet ./...
 
-with-wayland: fmt lint
+release: fmt lint
+	@go build -ldflags="-s -w" --tags nowayland -o mdedit cmd/mdedit/main.go
+
+wayland: fmt lint
 	@go build -o mdedit cmd/mdedit/main.go
