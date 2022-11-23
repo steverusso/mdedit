@@ -32,7 +32,7 @@ func (s *styling) add(v uint16, col int) {
 
 type mdHighlighter struct{}
 
-func (h *mdHighlighter) highlight(buf *buffer) (styles styling) {
+func (h *mdHighlighter) highlight(buf *buffer) styling {
 	const (
 		bqStarted uint8 = iota + 1
 		bqHitChar
@@ -47,7 +47,7 @@ func (h *mdHighlighter) highlight(buf *buffer) (styles styling) {
 		inEmphasis1  byte
 		inEmphasis2  byte
 	)
-	styles.markers = make([][]styleMark, len(buf.lines))
+	styles := styling{markers: make([][]styleMark, len(buf.lines))}
 
 lineloop:
 	for row := 0; row < len(buf.lines); row++ {
@@ -160,7 +160,7 @@ lineloop:
 					for {
 						row++
 						if row >= len(buf.lines) {
-							return
+							break lineloop
 						}
 						styles.startNewRow()
 						styles.add(marks|mdCodeBlock, start)
@@ -207,7 +207,7 @@ lineloop:
 		styles.startNewRow()
 	}
 
-	return
+	return styles
 }
 
 func isPunct(char byte) bool {
