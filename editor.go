@@ -291,25 +291,36 @@ func (ed *Editor) layLines(gtx C) D {
 		if row < len(ed.styles.markers) {
 			marks = ed.styles.markers[row]
 		}
-		markIndex := 0
+		nextMarkIndex := 0
 		fg, fnt := ed.styleBreakdown(nil)
 
 		segBegin := 0
 		for {
-			for ; markIndex < len(marks) && marks[markIndex].col == segBegin; markIndex++ {
-				fg, fnt = ed.styleBreakdown(&marks[markIndex])
+			// Eat consecutive style markers that mark the same column and set the actual
+			// styling based on the beginning of the segment (leave the loop with the mark
+			// index set to the next marker).
+			for nextMarkIndex < len(marks) && marks[nextMarkIndex].col == segBegin {
+				fg, fnt = ed.styleBreakdown(&marks[nextMarkIndex])
+				nextMarkIndex++
 			}
+			// The segment always starts out as the rest of the line. If there is a 'next'
+			// marker though, the segment will end right before that marker's column.
 			segEnd := len(line)
-			if markIndex < len(marks) {
-				segEnd = marks[markIndex].col
+			if nextMarkIndex < len(marks) {
+				segEnd = marks[nextMarkIndex].col
 			}
+			// If the beginning of the segement is at or past the end, then we're
+			// certainly done with this line.
 			if segBegin >= segEnd {
 				break
 			}
+			// If the cursor is within the current segment, then truncate the current
+			// segment to right before the cursor position (since the cursor will have
+			// different styling then the rest of the surrounding segment).
 			if ed.buf.cursor.row == row && ed.buf.cursor.col > segBegin && ed.buf.cursor.col < segEnd {
 				segEnd = ed.buf.cursor.col
 			}
-			// If the current segment end make no sense, then this set of markers is tossed.
+			// If the current segment end make no sense, these markers are tossed.
 			if n := len(line); segEnd > n {
 				segEnd = n
 				ed.styles = styling{}
