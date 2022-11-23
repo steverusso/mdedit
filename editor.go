@@ -276,8 +276,6 @@ func (ed *Editor) layLines(gtx C) D {
 		bufLineTotal = len(ed.buf.lines)
 		botIndex     = ed.buf.vision.y + ed.buf.vision.h
 		yOffset      = 0
-		mark         = ed.styles.findStart(ed.buf.vision.y, ed.buf.vision.x)
-		fg, fnt      = ed.styleBreakdown(mark)
 	)
 
 	// Draw each line of text.
@@ -289,21 +287,21 @@ func (ed *Editor) layLines(gtx C) D {
 		xOffset := ed.lnNumSpace + ed.charWidth // Start the line's text after the line number.
 		line := ed.buf.lines[row].text
 
+		fg, fnt := ed.styleBreakdown(nil)
+		marks := ed.styles.markers[row]
+		markIndex := 0
+
 		segBegin := 0
 		for {
-			mark = ed.styles.peek()
-			for mark != nil && mark.row == row && mark.col == segBegin {
-				fg, fnt = ed.styleBreakdown(mark)
-				ed.styles.index++
-				mark = ed.styles.peek()
+			for ; markIndex < len(marks) && marks[markIndex].col == segBegin; markIndex++ {
+				fg, fnt = ed.styleBreakdown(&marks[markIndex])
 			}
-			if segBegin > len(line)-1 {
-				break
-			}
-
 			segEnd := len(line)
-			if mark != nil && mark.row == row {
-				segEnd = mark.col
+			if markIndex < len(marks) {
+				segEnd = marks[markIndex].col
+			}
+			if segBegin >= segEnd {
+				break
 			}
 			if ed.buf.cursor.row == row && ed.buf.cursor.col > segBegin && ed.buf.cursor.col < segEnd {
 				segEnd = ed.buf.cursor.col

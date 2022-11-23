@@ -7,50 +7,27 @@ type highlighter interface {
 }
 
 type styleMark struct {
-	row   int
 	col   int
 	value uint16
 }
 
 type styling struct {
-	markers []styleMark
-	index   int
+	markers [][]styleMark
+	y       int
 }
 
-func (s *styling) add(v uint16, row, col int) {
-	s.markers = append(s.markers, styleMark{
-		value: v,
-		row:   row,
+func (s *styling) startNewRow() {
+	if s.y == len(s.markers) {
+		s.markers = append(s.markers, []styleMark{})
+	}
+	s.y++
+}
+
+func (s *styling) add(v uint16, col int) {
+	s.markers[s.y] = append(s.markers[s.y], styleMark{
 		col:   col,
+		value: v,
 	})
-}
-
-func (s *styling) current() *styleMark {
-	if s.index >= len(s.markers) {
-		return nil
-	}
-	return &s.markers[s.index]
-}
-
-func (s *styling) findStart(row, col int) *styleMark {
-	var i int
-	for i = 0; i < len(s.markers)-1; i++ {
-		if s.markers[i+1].row >= row {
-			break
-		}
-	}
-	s.index = i
-	if s.index >= 0 && s.index < len(s.markers) {
-		return &s.markers[s.index]
-	}
-	return nil
-}
-
-func (s *styling) peek() *styleMark {
-	if s.index+1 >= len(s.markers) {
-		return nil
-	}
-	return &s.markers[s.index+1]
 }
 
 type mdHighlighter struct{}
@@ -70,7 +47,7 @@ func (h *mdHighlighter) highlight(buf *buffer) (styles styling) {
 		inEmphasis1  byte
 		inEmphasis2  byte
 	)
-	styles.markers = make([]styleMark, len(buf.lines)*2)
+	styles.markers = make([][]styleMark, len(buf.lines))
 
 lineloop:
 	for row := 0; row < len(buf.lines); row++ {
@@ -82,7 +59,7 @@ lineloop:
 			}
 		}
 		marks = marks &^ mdHeading
-		styles.add(marks, row, 0)
+		styles.add(marks, 0)
 
 		var start int
 		for start = 0; start < len(line); start++ {
@@ -100,18 +77,18 @@ lineloop:
 					maybeHeading = true
 				case '>':
 					marks |= mdBlockquote
-					styles.add(marks, row, col)
+					styles.add(marks, col)
 					bqState = bqStarted
 				case '*', '+', '-':
 					if col+1 < len(line)-1 && line[col+1] == ' ' {
-						styles.add(marks|mdListMarker, row, col)
-						styles.add(marks, row, col+1)
+						styles.add(marks|mdListMarker, col)
+						styles.add(marks, col+1)
 						col++
 					}
 				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 					if col+2 < len(line)-1 && line[col+1] == '.' && line[col+2] == ' ' {
-						styles.add(marks|mdListMarker, row, col)
-						styles.add(marks, row, col+2)
+						styles.add(marks|mdListMarker, col)
+						styles.add(marks, col+2)
 						col += 2
 					}
 				}
@@ -122,7 +99,7 @@ lineloop:
 			if maybeHeading && char != '#' {
 				if char == ' ' {
 					marks |= mdHeading
-					styles.add(marks, row, start)
+					styles.add(marks, start)
 				}
 				maybeHeading = false
 			}
@@ -149,13 +126,13 @@ lineloop:
 						if next2 != ' ' && next2 != '\t' {
 							inEmphasis2 = char
 							marks |= mdStrong
-							styles.add(marks, row, col)
+							styles.add(marks, col)
 							col++
 						}
 					case inEmphasis2 == char && !isPrevBlank:
 						inEmphasis2 = 0
 						marks &^= mdStrong
-						styles.add(marks, row, col+2)
+						styles.add(marks, col+2)
 						col++
 					}
 				} else {
@@ -163,12 +140,12 @@ lineloop:
 					case inEmphasis1 == 0 && isPrevBlank && !isNextBlank:
 						inEmphasis1 = char
 						marks |= mdItalic
-						styles.add(marks, row, col)
+						styles.add(marks, col)
 					case inEmphasis1 != 0 && !isPrevBlank && (isNextBlank || isPunct(next) || next == inEmphasis2):
 						inEmphasis1 = 0
 						marks &^= mdItalic
 						if col < len(line)-1 {
-							styles.add(marks, row, col+1)
+							styles.add(marks, col+1)
 						}
 					}
 				}
@@ -178,26 +155,29 @@ lineloop:
 					next = line[col+1]
 				}
 				if col == start && next == '`' && col+2 < len(line) && line[col+2] == '`' {
-					styles.add(marks|mdCodeBlock, row, start)
+					styles.add(marks|mdCodeBlock, start)
 					delimCodeBlock := []byte("```")
 					for {
 						row++
 						if row >= len(buf.lines) {
 							return
 						}
+						styles.startNewRow()
+						styles.add(marks|mdCodeBlock, start)
 						ln := &buf.lines[row]
 						if bytes.Equal(ln.text[ln.startingIndex():], delimCodeBlock) {
 							break
 						}
 					}
-					styles.add(marks, row+1, 0)
+					styles.startNewRow()
+					styles.add(marks, 0)
 					continue lineloop
 				}
 				switch inCodeSpan {
 				case 0:
 					inCodeSpan = codeSpan1
 					marks |= mdCodeSpan
-					styles.add(marks, row, col)
+					styles.add(marks, col)
 					if next == '`' {
 						inCodeSpan = codeSpan2
 						col += 2
@@ -206,7 +186,7 @@ lineloop:
 					marks &^= mdCodeSpan
 					inCodeSpan = 0
 					if col < len(line)-1 {
-						styles.add(marks, row, col+1)
+						styles.add(marks, col+1)
 					}
 				case codeSpan2:
 					if next == '`' {
@@ -214,16 +194,17 @@ lineloop:
 						inCodeSpan = 0
 						col++
 						if col+1 < len(line)-1 {
-							styles.add(marks, row, col+2)
+							styles.add(marks, col+2)
 						}
 					}
 				}
 			}
 		}
 		if maybeHeading {
-			styles.add(marks|mdHeading, row, start)
+			styles.add(marks|mdHeading, start)
 			maybeHeading = false
 		}
+		styles.startNewRow()
 	}
 
 	return
