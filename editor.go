@@ -272,13 +272,11 @@ func (ed *Editor) del(c *command) {
 }
 
 func (ed *Editor) layLines(gtx C) D {
-	var (
-		bufLineTotal = len(ed.buf.lines)
-		botIndex     = ed.buf.vision.y + ed.buf.vision.h
-		yOffset      = 0
-	)
+	numBufLines := len(ed.buf.lines)
+	botIndex := ed.buf.vision.y + ed.buf.vision.h
+	yOffset := 0
 	// Draw each line of text.
-	for row := ed.buf.vision.y; row < min(bufLineTotal, botIndex); row++ {
+	for row := ed.buf.vision.y; row < min(numBufLines, botIndex); row++ {
 		gtx.Constraints.Min = image.Point{}
 		vertOffset := op.Offset(image.Point{Y: yOffset}).Push(gtx.Ops)
 		ed.drawLineNumber(gtx, row)
@@ -356,7 +354,7 @@ func (ed *Editor) layLines(gtx C) D {
 	}
 
 	// The blank lines (if any).
-	for row := bufLineTotal; row < botIndex; row++ {
+	for row := numBufLines; row < botIndex; row++ {
 		t := op.Offset(image.Point{Y: yOffset}).Push(gtx.Ops)
 		clr := ed.palette.ListMarker
 		clr.A = 100
@@ -426,7 +424,7 @@ func (ed *Editor) SetText(data []byte) {
 
 func (ed *Editor) highlight() {
 	if ed.highlighter == nil {
-		ed.highlighter = &mdHighlighter{}
+		ed.highlighter = mdHighlighter{}
 	}
 	ed.styleMarks = ed.highlighter.highlight(&ed.buf)
 }
