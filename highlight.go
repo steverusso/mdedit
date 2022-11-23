@@ -3,7 +3,7 @@ package mdedit
 import "bytes"
 
 type highlighter interface {
-	highlight(*buffer) styling
+	highlight(*buffer) [][]styleMark
 }
 
 type styleMark struct {
@@ -11,20 +11,20 @@ type styleMark struct {
 	value uint16
 }
 
-type styling struct {
+type styleBuilder struct {
 	markers [][]styleMark
-	y       int
+	row     int
 }
 
-func (s *styling) startNewRow() {
-	if s.y == len(s.markers) {
+func (s *styleBuilder) startNewRow() {
+	if s.row == len(s.markers) {
 		s.markers = append(s.markers, []styleMark{})
 	}
-	s.y++
+	s.row++
 }
 
-func (s *styling) add(v uint16, col int) {
-	s.markers[s.y] = append(s.markers[s.y], styleMark{
+func (s *styleBuilder) add(v uint16, col int) {
+	s.markers[s.row] = append(s.markers[s.row], styleMark{
 		col:   col,
 		value: v,
 	})
@@ -32,7 +32,7 @@ func (s *styling) add(v uint16, col int) {
 
 type mdHighlighter struct{}
 
-func (h *mdHighlighter) highlight(buf *buffer) styling {
+func (h *mdHighlighter) highlight(buf *buffer) [][]styleMark {
 	const (
 		bqStarted uint8 = iota + 1
 		bqHitChar
@@ -47,7 +47,7 @@ func (h *mdHighlighter) highlight(buf *buffer) styling {
 		inEmphasis1  byte
 		inEmphasis2  byte
 	)
-	styles := styling{markers: make([][]styleMark, len(buf.lines))}
+	sb := styleBuilder{markers: make([][]styleMark, len(buf.lines))}
 
 lineloop:
 	for row := 0; row < len(buf.lines); row++ {
@@ -59,7 +59,7 @@ lineloop:
 			}
 		}
 		marks = marks &^ mdHeading
-		styles.add(marks, 0)
+		sb.add(marks, 0)
 
 		var start int
 		for start = 0; start < len(line); start++ {
@@ -77,18 +77,18 @@ lineloop:
 					maybeHeading = true
 				case '>':
 					marks |= mdBlockquote
-					styles.add(marks, col)
+					sb.add(marks, col)
 					bqState = bqStarted
 				case '*', '+', '-':
 					if col+1 < len(line)-1 && line[col+1] == ' ' {
-						styles.add(marks|mdListMarker, col)
-						styles.add(marks, col+1)
+						sb.add(marks|mdListMarker, col)
+						sb.add(marks, col+1)
 						col++
 					}
 				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 					if col+2 < len(line)-1 && line[col+1] == '.' && line[col+2] == ' ' {
-						styles.add(marks|mdListMarker, col)
-						styles.add(marks, col+2)
+						sb.add(marks|mdListMarker, col)
+						sb.add(marks, col+2)
 						col += 2
 					}
 				}
@@ -99,7 +99,7 @@ lineloop:
 			if maybeHeading && char != '#' {
 				if char == ' ' {
 					marks |= mdHeading
-					styles.add(marks, start)
+					sb.add(marks, start)
 				}
 				maybeHeading = false
 			}
@@ -126,13 +126,13 @@ lineloop:
 						if next2 != ' ' && next2 != '\t' {
 							inEmphasis2 = char
 							marks |= mdStrong
-							styles.add(marks, col)
+							sb.add(marks, col)
 							col++
 						}
 					case inEmphasis2 == char && !isPrevBlank:
 						inEmphasis2 = 0
 						marks &^= mdStrong
-						styles.add(marks, col+2)
+						sb.add(marks, col+2)
 						col++
 					}
 				} else {
@@ -140,12 +140,12 @@ lineloop:
 					case inEmphasis1 == 0 && isPrevBlank && !isNextBlank:
 						inEmphasis1 = char
 						marks |= mdItalic
-						styles.add(marks, col)
+						sb.add(marks, col)
 					case inEmphasis1 != 0 && !isPrevBlank && (isNextBlank || isPunct(next) || next == inEmphasis2):
 						inEmphasis1 = 0
 						marks &^= mdItalic
 						if col < len(line)-1 {
-							styles.add(marks, col+1)
+							sb.add(marks, col+1)
 						}
 					}
 				}
@@ -155,29 +155,29 @@ lineloop:
 					next = line[col+1]
 				}
 				if col == start && next == '`' && col+2 < len(line) && line[col+2] == '`' {
-					styles.add(marks|mdCodeBlock, start)
+					sb.add(marks|mdCodeBlock, start)
 					delimCodeBlock := []byte("```")
 					for {
 						row++
 						if row >= len(buf.lines) {
 							break lineloop
 						}
-						styles.startNewRow()
-						styles.add(marks|mdCodeBlock, start)
+						sb.startNewRow()
+						sb.add(marks|mdCodeBlock, start)
 						ln := &buf.lines[row]
 						if bytes.Equal(ln.text[ln.startingIndex():], delimCodeBlock) {
 							break
 						}
 					}
-					styles.startNewRow()
-					styles.add(marks, 0)
+					sb.startNewRow()
+					sb.add(marks, 0)
 					continue lineloop
 				}
 				switch inCodeSpan {
 				case 0:
 					inCodeSpan = codeSpan1
 					marks |= mdCodeSpan
-					styles.add(marks, col)
+					sb.add(marks, col)
 					if next == '`' {
 						inCodeSpan = codeSpan2
 						col += 2
@@ -186,7 +186,7 @@ lineloop:
 					marks &^= mdCodeSpan
 					inCodeSpan = 0
 					if col < len(line)-1 {
-						styles.add(marks, col+1)
+						sb.add(marks, col+1)
 					}
 				case codeSpan2:
 					if next == '`' {
@@ -194,20 +194,20 @@ lineloop:
 						inCodeSpan = 0
 						col++
 						if col+1 < len(line)-1 {
-							styles.add(marks, col+2)
+							sb.add(marks, col+2)
 						}
 					}
 				}
 			}
 		}
 		if maybeHeading {
-			styles.add(marks|mdHeading, start)
+			sb.add(marks|mdHeading, start)
 			maybeHeading = false
 		}
-		styles.startNewRow()
+		sb.startNewRow()
 	}
 
-	return styles
+	return sb.markers
 }
 
 func isPunct(char byte) bool {

@@ -51,7 +51,7 @@ type Editor struct {
 	lnHeight    int
 	lnNumSpace  int
 	highlighter highlighter
-	styles      styling
+	styleMarks  [][]styleMark
 }
 
 func (ed *Editor) Layout(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Sp, pal Palette) D {
@@ -277,7 +277,6 @@ func (ed *Editor) layLines(gtx C) D {
 		botIndex     = ed.buf.vision.y + ed.buf.vision.h
 		yOffset      = 0
 	)
-
 	// Draw each line of text.
 	for row := ed.buf.vision.y; row < min(bufLineTotal, botIndex); row++ {
 		gtx.Constraints.Min = image.Point{}
@@ -288,8 +287,8 @@ func (ed *Editor) layLines(gtx C) D {
 		line := ed.buf.lines[row].text
 
 		var marks []styleMark
-		if row < len(ed.styles.markers) {
-			marks = ed.styles.markers[row]
+		if row < len(ed.styleMarks) {
+			marks = ed.styleMarks[row]
 		}
 		nextMarkIndex := 0
 		fg, fnt := ed.styleBreakdown(nil)
@@ -323,7 +322,7 @@ func (ed *Editor) layLines(gtx C) D {
 			// If the current segment end make no sense, these markers are tossed.
 			if n := len(line); segEnd > n {
 				segEnd = n
-				ed.styles = styling{}
+				ed.styleMarks = nil
 				fg, fnt = ed.styleBreakdown(nil)
 			}
 
@@ -429,7 +428,7 @@ func (ed *Editor) highlight() {
 	if ed.highlighter == nil {
 		ed.highlighter = &mdHighlighter{}
 	}
-	ed.styles = ed.highlighter.highlight(&ed.buf)
+	ed.styleMarks = ed.highlighter.highlight(&ed.buf)
 }
 
 func (ed *Editor) Text() []byte {
