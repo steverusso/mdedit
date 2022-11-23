@@ -287,9 +287,12 @@ func (ed *Editor) layLines(gtx C) D {
 		xOffset := ed.lnNumSpace + ed.charWidth // Start the line's text after the line number.
 		line := ed.buf.lines[row].text
 
-		fg, fnt := ed.styleBreakdown(nil)
-		marks := ed.styles.markers[row]
+		var marks []styleMark
+		if row < len(ed.styles.markers) {
+			marks = ed.styles.markers[row]
+		}
 		markIndex := 0
+		fg, fnt := ed.styleBreakdown(nil)
 
 		segBegin := 0
 		for {
