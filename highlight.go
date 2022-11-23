@@ -3,28 +3,28 @@ package mdedit
 import "bytes"
 
 type highlighter interface {
-	highlight(*buffer) [][]styleMark
+	highlight(*buffer) [][]mdStyleMark
 }
 
-type styleMark struct {
+type mdStyleMark struct {
 	col   int
 	value uint16
 }
 
 type styleBuilder struct {
-	markers [][]styleMark
+	markers [][]mdStyleMark
 	row     int
 }
 
 func (s *styleBuilder) startNewRow() {
 	if s.row == len(s.markers) {
-		s.markers = append(s.markers, []styleMark{})
+		s.markers = append(s.markers, []mdStyleMark{})
 	}
 	s.row++
 }
 
 func (s *styleBuilder) add(v uint16, col int) {
-	s.markers[s.row] = append(s.markers[s.row], styleMark{
+	s.markers[s.row] = append(s.markers[s.row], mdStyleMark{
 		col:   col,
 		value: v,
 	})
@@ -32,7 +32,7 @@ func (s *styleBuilder) add(v uint16, col int) {
 
 type mdHighlighter struct{}
 
-func (_ mdHighlighter) highlight(buf *buffer) [][]styleMark {
+func (_ mdHighlighter) highlight(buf *buffer) [][]mdStyleMark {
 	const (
 		bqStarted uint8 = iota + 1
 		bqHitChar
@@ -47,7 +47,7 @@ func (_ mdHighlighter) highlight(buf *buffer) [][]styleMark {
 		inEmphasis1  byte
 		inEmphasis2  byte
 	)
-	sb := styleBuilder{markers: make([][]styleMark, len(buf.lines))}
+	sb := styleBuilder{markers: make([][]mdStyleMark, len(buf.lines))}
 
 lineloop:
 	for row := 0; row < len(buf.lines); row++ {

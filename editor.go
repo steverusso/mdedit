@@ -51,7 +51,7 @@ type Editor struct {
 	lnHeight    int
 	lnNumSpace  int
 	highlighter highlighter
-	styleMarks  [][]styleMark
+	styleMarks  [][]mdStyleMark
 }
 
 func (ed *Editor) Layout(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Sp, pal Palette) D {
@@ -284,7 +284,7 @@ func (ed *Editor) layLines(gtx C) D {
 		xOffset := ed.lnNumSpace + ed.charWidth // Start the line's text after the line number.
 		line := ed.buf.lines[row].text
 
-		var marks []styleMark
+		var marks []mdStyleMark
 		if row < len(ed.styleMarks) {
 			marks = ed.styleMarks[row]
 		}
@@ -367,7 +367,7 @@ func (ed *Editor) layLines(gtx C) D {
 	return D{Size: gtx.Constraints.Max}
 }
 
-func (ed *Editor) styleBreakdown(m *styleMark) (color.NRGBA, text.Font) {
+func (ed *Editor) styleBreakdown(m *mdStyleMark) (color.NRGBA, text.Font) {
 	fg := ed.palette.Fg
 	fnt := ed.font
 	if m == nil || m.value == 0 {
