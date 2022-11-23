@@ -54,6 +54,10 @@ type Editor struct {
 	styleMarks  [][]mdStyleMark
 }
 
+type highlighter interface {
+	highlight(*buffer) [][]mdStyleMark
+}
+
 func (ed *Editor) Layout(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Sp, pal Palette) D {
 	ed.ensure(gtx, sh, fnt, txtSize, pal)
 

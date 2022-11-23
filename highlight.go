@@ -2,10 +2,6 @@ package mdedit
 
 import "bytes"
 
-type highlighter interface {
-	highlight(*buffer) [][]mdStyleMark
-}
-
 type mdStyleMark struct {
 	col   int
 	value uint16
