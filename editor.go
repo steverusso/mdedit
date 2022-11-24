@@ -68,7 +68,6 @@ func (ed *Editor) Layout(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Sp, 
 			ed.reqFocus = true
 		}
 	}
-
 	if ed.reqFocus {
 		key.FocusOp{Tag: &ed.eventKey}.Add(gtx.Ops)
 		ed.reqFocus = false
@@ -344,7 +343,6 @@ func (ed *Editor) layLines(gtx C) D {
 			xOffset += segDims.Size.X
 			segBegin = segEnd
 		}
-
 		// Draw the cursor if it's after the last character on the line.
 		if ed.buf.cursor.is(row, segBegin) {
 			xOffsetOp := op.Offset(image.Point{X: xOffset}).Push(gtx.Ops)
@@ -352,11 +350,9 @@ func (ed *Editor) layLines(gtx C) D {
 			paint.FillShape(gtx.Ops, ed.palette.Fg, rect.Op())
 			xOffsetOp.Pop()
 		}
-
 		vertOffset.Pop()
 		yOffset += ed.lnHeight
 	}
-
 	// The blank lines (if any).
 	for row := numBufLines; row < botIndex; row++ {
 		t := op.Offset(image.Point{Y: yOffset}).Push(gtx.Ops)
@@ -367,7 +363,6 @@ func (ed *Editor) layLines(gtx C) D {
 		yOffset += ed.lnHeight
 		t.Pop()
 	}
-
 	return D{Size: gtx.Constraints.Max}
 }
 
