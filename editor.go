@@ -278,7 +278,7 @@ func (ed *Editor) layLines(gtx C) D {
 	numBufLines := len(ed.buf.lines)
 	botIndex := ed.buf.vision.y + ed.buf.vision.h
 	yOffset := 0
-	// Draw each line of text.
+	// Draw each visible line of text.
 	for row := ed.buf.vision.y; row < min(numBufLines, botIndex); row++ {
 		gtx.Constraints.Min = image.Point{}
 		vertOffset := op.Offset(image.Point{Y: yOffset}).Push(gtx.Ops)
