@@ -137,7 +137,7 @@ func (sb *spanBuilder) writeLines(source []byte, n ast.Node) {
 	for i := 0; i < l; i++ {
 		line := n.Lines().At(i)
 		v := line.Value(source)
-		v = bytes.ReplaceAll(v, []byte{'\t'}, []byte("    ")) // todo: this should only replace leading tab characters not in strings
+		v = bytes.ReplaceAll(v, []byte{'\t'}, []byte("    ")) // TODO this should only replace leading tab characters not in strings
 		if i == l-1 && len(v) > 0 && v[len(v)-1] == '\n' {
 			v = v[:len(v)-1]
 		}
@@ -214,7 +214,7 @@ func (sb *spanBuilder) renderFencedCodeBlock(_ util.BufWriter, src []byte, n ast
 	if entering {
 		sb.current.mdata = isFencedCodeBlock{}
 		sb.currentSpan().Font.Variant = "Mono"
-		sb.writeLines(src, n) // todo: store the text content in the spanGroup metadata
+		sb.writeLines(src, n) // TODO store the text content in the spanGroup metadata
 	} else {
 		sb.commitGroup()
 	}

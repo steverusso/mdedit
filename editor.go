@@ -117,7 +117,7 @@ func (ed *Editor) processNormalEvents(gtx C) {
 				case "E":
 					ed.buf.scrollVision(1)
 				case "R":
-					// todo: redo?
+					// TODO redo?
 				case "S":
 					ed.reqSave = true
 				}
@@ -204,11 +204,11 @@ func (ed *Editor) exec(c *command) {
 	case 'd':
 		ed.del(c)
 	case 'y':
-		// todo: yank whatever motion covers
+		// TODO yank whatever motion covers
 	case 'P':
-		// todo: paste before cursor [count] times
+		// TODO paste before cursor [count] times
 	case 'p':
-		// todo: paste after cursor [count] times
+		// TODO paste after cursor [count] times
 	}
 }
 
