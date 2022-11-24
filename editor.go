@@ -68,7 +68,6 @@ func (ed *Editor) Layout(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Sp, 
 			ed.reqFocus = true
 		}
 	}
-
 	if ed.reqFocus {
 		key.FocusOp{Tag: &ed.eventKey}.Add(gtx.Ops)
 		ed.reqFocus = false
@@ -117,7 +116,7 @@ func (ed *Editor) processNormalEvents(gtx C) {
 				case "E":
 					ed.buf.scrollVision(1)
 				case "R":
-					// todo: redo?
+					// TODO redo?
 				case "S":
 					ed.reqSave = true
 				}
@@ -204,11 +203,11 @@ func (ed *Editor) exec(c *command) {
 	case 'd':
 		ed.del(c)
 	case 'y':
-		// todo: yank whatever motion covers
+		// TODO yank whatever motion covers
 	case 'P':
-		// todo: paste before cursor [count] times
+		// TODO paste before cursor [count] times
 	case 'p':
-		// todo: paste after cursor [count] times
+		// TODO paste after cursor [count] times
 	}
 }
 
@@ -279,7 +278,7 @@ func (ed *Editor) layLines(gtx C) D {
 	numBufLines := len(ed.buf.lines)
 	botIndex := ed.buf.vision.y + ed.buf.vision.h
 	yOffset := 0
-	// Draw each line of text.
+	// Draw each visible line of text.
 	for row := ed.buf.vision.y; row < min(numBufLines, botIndex); row++ {
 		gtx.Constraints.Min = image.Point{}
 		vertOffset := op.Offset(image.Point{Y: yOffset}).Push(gtx.Ops)
@@ -344,7 +343,6 @@ func (ed *Editor) layLines(gtx C) D {
 			xOffset += segDims.Size.X
 			segBegin = segEnd
 		}
-
 		// Draw the cursor if it's after the last character on the line.
 		if ed.buf.cursor.is(row, segBegin) {
 			xOffsetOp := op.Offset(image.Point{X: xOffset}).Push(gtx.Ops)
@@ -352,11 +350,9 @@ func (ed *Editor) layLines(gtx C) D {
 			paint.FillShape(gtx.Ops, ed.palette.Fg, rect.Op())
 			xOffsetOp.Pop()
 		}
-
 		vertOffset.Pop()
 		yOffset += ed.lnHeight
 	}
-
 	// The blank lines (if any).
 	for row := numBufLines; row < botIndex; row++ {
 		t := op.Offset(image.Point{Y: yOffset}).Push(gtx.Ops)
@@ -367,7 +363,6 @@ func (ed *Editor) layLines(gtx C) D {
 		yOffset += ed.lnHeight
 		t.Pop()
 	}
-
 	return D{Size: gtx.Constraints.Max}
 }
 

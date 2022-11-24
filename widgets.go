@@ -39,39 +39,6 @@ func mustIcon(iconBytes []byte) *widget.Icon {
 	return ic
 }
 
-func darken(c color.NRGBA, f float32) color.NRGBA {
-	return color.NRGBA{
-		R: uint8(float32(c.R) * (1 - f)),
-		G: uint8(float32(c.G) * (1 - f)),
-		B: uint8(float32(c.B) * (1 - f)),
-		A: 255,
-	}
-}
-
-func lighten(c color.NRGBA, f float32) color.NRGBA {
-	return color.NRGBA{
-		R: c.R + uint8(float32(255-c.R)*f),
-		G: c.G + uint8(float32(255-c.G)*f),
-		B: c.B + uint8(float32(255-c.B)*f),
-		A: 255,
-	}
-}
-
-func merge(c1, c2 color.NRGBA, p float32) color.NRGBA {
-	return color.NRGBA{
-		R: mergeCalc(c1.R, c2.R, p),
-		G: mergeCalc(c1.G, c2.G, p),
-		B: mergeCalc(c1.B, c2.B, p),
-		A: 255,
-	}
-}
-
-func mergeCalc(a, b uint8, p float32) uint8 {
-	v1 := float32(a) * (1 - p)
-	v2 := float32(b) * p
-	return uint8(v1 + v2)
-}
-
 type rule struct {
 	width int
 	color color.NRGBA
@@ -209,4 +176,37 @@ func (g *buttonGroup) drawButton(gtx C, b groupButton) D {
 		return D{}
 	}
 	return layout.UniformInset(6).Layout(gtx, content)
+}
+
+func darken(c color.NRGBA, f float32) color.NRGBA {
+	return color.NRGBA{
+		R: uint8(float32(c.R) * (1 - f)),
+		G: uint8(float32(c.G) * (1 - f)),
+		B: uint8(float32(c.B) * (1 - f)),
+		A: 255,
+	}
+}
+
+func lighten(c color.NRGBA, f float32) color.NRGBA {
+	return color.NRGBA{
+		R: c.R + uint8(float32(255-c.R)*f),
+		G: c.G + uint8(float32(255-c.G)*f),
+		B: c.B + uint8(float32(255-c.B)*f),
+		A: 255,
+	}
+}
+
+func merge(c1, c2 color.NRGBA, p float32) color.NRGBA {
+	return color.NRGBA{
+		R: mergeCalc(c1.R, c2.R, p),
+		G: mergeCalc(c1.G, c2.G, p),
+		B: mergeCalc(c1.B, c2.B, p),
+		A: 255,
+	}
+}
+
+func mergeCalc(a, b uint8, p float32) uint8 {
+	v1 := float32(a) * (1 - p)
+	v2 := float32(b) * p
+	return uint8(v1 + v2)
 }
