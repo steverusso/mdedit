@@ -14,20 +14,6 @@ import (
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
-const (
-	// blocks
-	mdHeading uint16 = 1 << iota
-	mdBlockquote
-	mdCodeBlock
-	mdThematicBreak
-	// inlines
-	mdItalic
-	mdStrong
-	mdCodeSpan
-	mdListMarker
-	mdLinkURL
-)
-
 type (
 	C = layout.Context
 	D = layout.Dimensions

@@ -51,7 +51,11 @@ type Editor struct {
 	lnHeight    int
 	lnNumSpace  int
 	highlighter highlighter
-	styles      styling
+	styleMarks  [][]mdStyleMark
+}
+
+type highlighter interface {
+	highlight(*buffer) [][]mdStyleMark
 }
 
 func (ed *Editor) Layout(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Sp, pal Palette) D {
@@ -272,16 +276,11 @@ func (ed *Editor) del(c *command) {
 }
 
 func (ed *Editor) layLines(gtx C) D {
-	var (
-		bufLineTotal = len(ed.buf.lines)
-		botIndex     = ed.buf.vision.y + ed.buf.vision.h
-		yOffset      = 0
-		mark         = ed.styles.findStart(ed.buf.vision.y, ed.buf.vision.x)
-		fg, fnt      = ed.styleBreakdown(mark)
-	)
-
+	numBufLines := len(ed.buf.lines)
+	botIndex := ed.buf.vision.y + ed.buf.vision.h
+	yOffset := 0
 	// Draw each line of text.
-	for row := ed.buf.vision.y; row < min(bufLineTotal, botIndex); row++ {
+	for row := ed.buf.vision.y; row < min(numBufLines, botIndex); row++ {
 		gtx.Constraints.Min = image.Point{}
 		vertOffset := op.Offset(image.Point{Y: yOffset}).Push(gtx.Ops)
 		ed.drawLineNumber(gtx, row)
@@ -289,29 +288,43 @@ func (ed *Editor) layLines(gtx C) D {
 		xOffset := ed.lnNumSpace + ed.charWidth // Start the line's text after the line number.
 		line := ed.buf.lines[row].text
 
+		var marks []mdStyleMark
+		if row < len(ed.styleMarks) {
+			marks = ed.styleMarks[row]
+		}
+		nextMarkIndex := 0
+		fg, fnt := ed.styleBreakdown(nil)
+
 		segBegin := 0
 		for {
-			mark = ed.styles.peek()
-			for mark != nil && mark.row == row && mark.col == segBegin {
-				fg, fnt = ed.styleBreakdown(mark)
-				ed.styles.index++
-				mark = ed.styles.peek()
+			// Eat consecutive style markers that mark the same column and set the actual
+			// styling based on the beginning of the segment (leave the loop with the mark
+			// index set to the next marker).
+			for nextMarkIndex < len(marks) && marks[nextMarkIndex].col == segBegin {
+				fg, fnt = ed.styleBreakdown(&marks[nextMarkIndex])
+				nextMarkIndex++
 			}
-			if segBegin > len(line)-1 {
+			// The segment always starts out as the rest of the line. If there is a 'next'
+			// marker though, the segment will end right before that marker's column.
+			segEnd := len(line)
+			if nextMarkIndex < len(marks) {
+				segEnd = marks[nextMarkIndex].col
+			}
+			// If the beginning of the segement is at or past the end, then we're
+			// certainly done with this line.
+			if segBegin >= segEnd {
 				break
 			}
-
-			segEnd := len(line)
-			if mark != nil && mark.row == row {
-				segEnd = mark.col
-			}
+			// If the cursor is within the current segment, then truncate the current
+			// segment to right before the cursor position (since the cursor will have
+			// different styling then the rest of the surrounding segment).
 			if ed.buf.cursor.row == row && ed.buf.cursor.col > segBegin && ed.buf.cursor.col < segEnd {
 				segEnd = ed.buf.cursor.col
 			}
-			// If the current segment end make no sense, then this set of markers is tossed.
+			// If the current segment end make no sense, these markers are tossed.
 			if n := len(line); segEnd > n {
 				segEnd = n
-				ed.styles = styling{}
+				ed.styleMarks = nil
 				fg, fnt = ed.styleBreakdown(nil)
 			}
 
@@ -345,7 +358,7 @@ func (ed *Editor) layLines(gtx C) D {
 	}
 
 	// The blank lines (if any).
-	for row := bufLineTotal; row < botIndex; row++ {
+	for row := numBufLines; row < botIndex; row++ {
 		t := op.Offset(image.Point{Y: yOffset}).Push(gtx.Ops)
 		clr := ed.palette.ListMarker
 		clr.A = 100
@@ -358,7 +371,7 @@ func (ed *Editor) layLines(gtx C) D {
 	return D{Size: gtx.Constraints.Max}
 }
 
-func (ed *Editor) styleBreakdown(m *styleMark) (color.NRGBA, text.Font) {
+func (ed *Editor) styleBreakdown(m *mdStyleMark) (color.NRGBA, text.Font) {
 	fg := ed.palette.Fg
 	fnt := ed.font
 	if m == nil || m.value == 0 {
@@ -415,9 +428,9 @@ func (ed *Editor) SetText(data []byte) {
 
 func (ed *Editor) highlight() {
 	if ed.highlighter == nil {
-		ed.highlighter = &mdHighlighter{}
+		ed.highlighter = mdHighlighter{}
 	}
-	ed.styles = ed.highlighter.highlight(&ed.buf)
+	ed.styleMarks = ed.highlighter.highlight(&ed.buf)
 }
 
 func (ed *Editor) Text() []byte {
