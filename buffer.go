@@ -16,8 +16,10 @@ type position struct {
 }
 
 type vision struct {
-	x, y int
-	w, h int
+	x int
+	y int
+	w int
+	h int
 }
 
 func (b *buffer) currentLine() *line {
