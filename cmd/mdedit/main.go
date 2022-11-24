@@ -25,6 +25,8 @@ const topLevelKeySet = "Ctrl-[O,W," + key.NameTab + "]" +
 	"|Ctrl-Shift-[" + key.NamePageUp + "," + key.NamePageDown + "," + key.NameTab + "]" +
 	"|Alt-[1,2,3,4,5,6,7,8,9]"
 
+var printFrameTimes = flag.Bool("print-frame-times", false, "Print how long each frame takes.")
+
 type diskFS struct {
 	homeDir    string
 	workingDir string
@@ -124,7 +126,9 @@ func run() error {
 			areaStack.Pop()
 
 			e.Frame(gtx.Ops)
-			log.Println(time.Now().Sub(start))
+			if *printFrameTimes {
+				log.Println(time.Now().Sub(start))
+			}
 		case system.DestroyEvent:
 			return e.Err
 		}
