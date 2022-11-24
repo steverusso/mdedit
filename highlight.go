@@ -2,6 +2,20 @@ package mdedit
 
 import "bytes"
 
+const (
+	// blocks
+	mdHeading uint16 = 1 << iota
+	mdBlockquote
+	mdCodeBlock
+	mdThematicBreak
+	// inlines
+	mdItalic
+	mdStrong
+	mdCodeSpan
+	mdListMarker
+	mdLinkURL
+)
+
 type mdStyleMark struct {
 	col   int
 	value uint16
