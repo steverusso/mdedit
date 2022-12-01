@@ -309,11 +309,6 @@ func (ed *Editor) layLines(gtx C) D {
 			if nextMarkIndex < len(marks) {
 				segEnd = marks[nextMarkIndex].col
 			}
-			// If the beginning of the segement is at or past the end, then we're
-			// certainly done with this line.
-			if segBegin >= segEnd {
-				break
-			}
 			// If the cursor is within the current segment, then truncate the current
 			// segment to right before the cursor position (since the cursor will have
 			// different styling then the rest of the surrounding segment).
@@ -325,6 +320,11 @@ func (ed *Editor) layLines(gtx C) D {
 				segEnd = n
 				ed.styleMarks = nil
 				fg, fnt = ed.styleBreakdown(nil)
+			}
+			// If the beginning of the segement is at or past the end, then we're
+			// certainly done with this line.
+			if segBegin >= segEnd {
+				break
 			}
 
 			xOffsetOp := op.Offset(image.Point{X: xOffset}).Push(gtx.Ops)
