@@ -5,7 +5,7 @@ go 1.19
 require (
 	gioui.org v0.0.0-20221116222243-5c84cf7e9021
 	gioui.org/x v0.0.0-20221110201648-c0c92248522e
-	github.com/steverusso/gio-fonts v0.0.0-20221118164031-86919e20ff66
+	github.com/steverusso/gio-fonts v0.0.0-20221130234206-4a763ca7f642
 	github.com/yuin/goldmark v1.5.3
 	golang.org/x/exp/shiny v0.0.0-20220827204233-334a2380cb91
 	golang.org/x/image v0.0.0-20220722155232-062f8c9fd539
