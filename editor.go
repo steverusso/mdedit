@@ -331,7 +331,7 @@ func (ed *Editor) layLines(gtx C) D {
 			xOffsetOp := op.Offset(image.Point{X: xOffset}).Push(gtx.Ops)
 			if ed.buf.cursor.is(row, segBegin) {
 				segEnd = segBegin + 1
-				rect := clip.Rect{Max: image.Point{ed.charWidth, gtx.Sp(ed.textSize)}}
+				rect := clip.Rect{Max: image.Point{ed.charWidth, ed.lnHeight}}
 				paint.FillShape(gtx.Ops, fg, rect.Op())
 				paint.ColorOp{Color: ed.palette.Bg}.Add(gtx.Ops)
 			} else {
@@ -463,16 +463,16 @@ func (ed *Editor) ensure(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Sp, 
 		txtSize = unit.Sp(int(txtSize + 1))
 	}
 	if ed.maxSize != gtx.Constraints.Max || ed.textSize != txtSize {
-		const lnPadding = 1
 		ed.maxSize = gtx.Constraints.Max
 		ed.textSize = txtSize
-		ed.lnHeight = gtx.Sp(txtSize) + lnPadding
-		ed.buf.vision.h = ed.maxSize.Y / ed.lnHeight
-		// Determine character width and, from that, the width that will be used for the line numbers.
+		// Determine character width and, from that, the width that will be used for the
+		// line numbers.
 		textSize := fixed.I(gtx.Sp(txtSize))
-		lines := sh.LayoutString(fnt, textSize, ed.maxSize.X, gtx.Locale, " ")
-		ed.charWidth = lines[0].Width.Ceil()
+		ln := sh.LayoutString(fnt, textSize, ed.maxSize.X, gtx.Locale, " ")[0]
+		ed.charWidth = ln.Width.Ceil()
+		ed.lnHeight = ln.Ascent.Ceil() + ln.Descent.Ceil()
 		ed.lnNumSpace = ed.charWidth * max(2, len(fmt.Sprint(len(ed.buf.lines))))
+		ed.buf.vision.h = ed.maxSize.Y / ed.lnHeight
 	}
 	if ed.palette != pal {
 		ed.palette = pal
