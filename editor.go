@@ -14,7 +14,6 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"gioui.org/widget"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -278,12 +277,13 @@ func (ed *Editor) del(c *command) {
 func (ed *Editor) layLines(gtx C) D {
 	numBufLines := len(ed.buf.lines)
 	botIndex := ed.buf.vision.y + ed.buf.vision.h
+	textSize := fixed.I(gtx.Sp(ed.textSize))
 	yOffset := 0
 	// Draw each visible line of text.
 	for row := ed.buf.vision.y; row < min(numBufLines, botIndex); row++ {
 		gtx.Constraints.Min = image.Point{}
 		vertOffset := op.Offset(image.Point{Y: yOffset}).Push(gtx.Ops)
-		ed.drawLineNumber(gtx, row)
+		ed.drawLineNumber(gtx, textSize, row)
 
 		xOffset := ed.lnNumSpace + ed.charWidth // Start the line's text after the line number.
 		line := ed.buf.lines[row].text
@@ -338,7 +338,7 @@ func (ed *Editor) layLines(gtx C) D {
 				paint.ColorOp{Color: fg}.Add(gtx.Ops)
 			}
 			seg := string(line[segBegin:segEnd])
-			segDims := widget.Label{MaxLines: 1}.Layout(gtx, ed.shaper, fnt, ed.textSize, seg)
+			segDims := drawText(gtx, ed.shaper, fnt, textSize, seg)
 			xOffsetOp.Pop()
 
 			xOffset += segDims.Size.X
@@ -360,7 +360,7 @@ func (ed *Editor) layLines(gtx C) D {
 		clr := ed.palette.ListMarker
 		clr.A = 100
 		paint.ColorOp{Color: clr}.Add(gtx.Ops)
-		widget.Label{}.Layout(gtx, ed.shaper, ed.font, ed.textSize, "~")
+		drawText(gtx, ed.shaper, ed.font, textSize, "~")
 		yOffset += ed.lnHeight
 		t.Pop()
 	}
@@ -400,7 +400,7 @@ func (ed *Editor) styleBreakdown(m *mdStyleMark) (color.NRGBA, text.Font) {
 	return fg, fnt
 }
 
-func (ed *Editor) drawLineNumber(gtx C, row int) {
+func (ed *Editor) drawLineNumber(gtx C, size fixed.Int26_6, row int) {
 	num := row + 1
 	if row < ed.buf.cursor.row {
 		num = ed.buf.cursor.row - row
@@ -408,13 +408,20 @@ func (ed *Editor) drawLineNumber(gtx C, row int) {
 	if row > ed.buf.cursor.row {
 		num = row - ed.buf.cursor.row
 	}
-	lbl := widget.Label{MaxLines: 1}
-	if row != ed.buf.cursor.row {
-		lbl.Alignment = text.End
-	}
+	numStr := fmt.Sprint(num)
 	gtx.Constraints.Min.X = ed.lnNumSpace
 	paint.ColorOp{Color: ed.palette.LineNumber}.Add(gtx.Ops)
-	lbl.Layout(gtx, ed.shaper, ed.font, ed.textSize, fmt.Sprint(num))
+	if row != ed.buf.cursor.row {
+		// We want inactive line numbers to hug the text (in other words, be aligned
+		// toward the right). So before drawing these line numbers, we offset by what
+		// would be the remaining empty space so that the text will be off to the right.
+		emptySpace := ed.lnNumSpace - len(numStr)*ed.charWidth
+		opOffset := op.Offset(image.Point{X: emptySpace}).Push(gtx.Ops)
+		drawText(gtx, ed.shaper, ed.font, size, numStr)
+		opOffset.Pop()
+	} else {
+		drawText(gtx, ed.shaper, ed.font, size, numStr)
+	}
 }
 
 func (ed *Editor) SetText(data []byte) {
@@ -477,4 +484,19 @@ func (ed *Editor) ensure(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Sp, 
 	if ed.palette != pal {
 		ed.palette = pal
 	}
+}
+
+func drawText(gtx C, sh text.Shaper, fnt text.Font, size fixed.Int26_6, txt string) D {
+	ln := sh.LayoutString(fnt, size, gtx.Constraints.Max.X, gtx.Locale, txt)[0]
+
+	opOffset := op.Offset(image.Point{Y: ln.Ascent.Ceil()}).Push(gtx.Ops)
+	opOutline := clip.Outline{Path: sh.Shape(fnt, size, ln.Layout)}.Op().Push(gtx.Ops)
+	paint.PaintOp{}.Add(gtx.Ops)
+	opOutline.Pop()
+	opOffset.Pop()
+
+	return D{Size: image.Point{
+		X: ln.Width.Ceil(),
+		Y: ln.Ascent.Ceil(),
+	}}
 }
