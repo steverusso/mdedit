@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"math"
 
 	"gioui.org/gesture"
 	"gioui.org/io/key"
@@ -454,6 +455,12 @@ func (ed *Editor) ensure(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Sp, 
 	}
 	if ed.font != fnt {
 		ed.font = fnt
+	}
+	// Truncate and round up the given text size so it's never an odd number (which causes
+	// ui bugs from rounding errors on groups of characters).
+	txtSize = unit.Sp(math.Round(float64(txtSize)))
+	if int(txtSize)%2 != 0 {
+		txtSize = unit.Sp(int(txtSize + 1))
 	}
 	if ed.maxSize != gtx.Constraints.Max || ed.textSize != txtSize {
 		const lnPadding = 1
