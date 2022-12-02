@@ -11,13 +11,20 @@ import (
 	"time"
 
 	"gioui.org/app"
+	"gioui.org/font/opentype"
 	"gioui.org/io/key"
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
+	"gioui.org/text"
 	"gioui.org/widget/material"
-	"github.com/steverusso/gio-fonts/ubuntu"
+	"github.com/steverusso/gio-fonts/inconsolata/inconsolatabold"
+	"github.com/steverusso/gio-fonts/inconsolata/inconsolataregular"
+	"github.com/steverusso/gio-fonts/nunito/nunitobold"
+	"github.com/steverusso/gio-fonts/nunito/nunitobolditalic"
+	"github.com/steverusso/gio-fonts/nunito/nunitoitalic"
+	"github.com/steverusso/gio-fonts/nunito/nunitoregular"
 	"github.com/steverusso/mdedit"
 )
 
@@ -79,6 +86,14 @@ func (_ *diskFS) WriteFile(fpath string, data []byte) error {
 	return os.WriteFile(fpath, data, 0o644)
 }
 
+func mustFont(fnt text.Font, data []byte) text.FontFace {
+	face, err := opentype.Parse(data)
+	if err != nil {
+		panic("failed to parse font: " + err.Error())
+	}
+	return text.FontFace{Font: fnt, Face: face}
+}
+
 func run() error {
 	win := app.NewWindow(
 		app.Size(1500, 900),
@@ -86,8 +101,17 @@ func run() error {
 	)
 	win.Perform(system.ActionCenter)
 
-	th := material.NewTheme(ubuntu.Collection())
-	th.TextSize = 17
+	th := material.NewTheme([]text.FontFace{
+		// Proportionals.
+		mustFont(text.Font{}, nunitoregular.TTF),
+		mustFont(text.Font{Weight: text.Bold}, nunitobold.TTF),
+		mustFont(text.Font{Weight: text.Bold, Style: text.Italic}, nunitobolditalic.TTF),
+		mustFont(text.Font{Style: text.Italic}, nunitoitalic.TTF),
+		// Monos.
+		mustFont(text.Font{Variant: "Mono"}, inconsolataregular.TTF),
+		mustFont(text.Font{Variant: "Mono", Weight: text.Bold}, inconsolatabold.TTF),
+	})
+	th.TextSize = 18
 	th.Palette = material.Palette{
 		Bg:         color.NRGBA{17, 21, 24, 255},
 		Fg:         color.NRGBA{235, 235, 235, 255},
