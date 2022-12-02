@@ -326,7 +326,7 @@ func (t *markdownTab) focus() {
 }
 
 type explorerTab struct {
-	expl *Explorer
+	expl Explorer
 }
 
 func (t *explorerTab) title() string {

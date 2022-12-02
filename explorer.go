@@ -28,8 +28,8 @@ type Explorer struct {
 	events      []ExplorerEvent
 }
 
-func NewExplorer(rootDir, openToDir string) *Explorer {
-	ex := &Explorer{rootDir: rootDir}
+func NewExplorer(rootDir, openToDir string) Explorer {
+	ex := Explorer{rootDir: rootDir}
 	ex.entryList.Axis = layout.Vertical
 	if openToDir == "" {
 		openToDir = rootDir
