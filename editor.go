@@ -1,10 +1,10 @@
 package mdedit
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"math"
+	"strconv"
 
 	"gioui.org/gesture"
 	"gioui.org/io/key"
@@ -408,7 +408,7 @@ func (ed *Editor) drawLineNumber(gtx C, size fixed.Int26_6, row int) {
 	if row > ed.buf.cursor.row {
 		num = row - ed.buf.cursor.row
 	}
-	numStr := fmt.Sprint(num)
+	numStr := strconv.Itoa(num)
 	gtx.Constraints.Min.X = ed.lnNumSpace
 	paint.ColorOp{Color: ed.palette.LineNumber}.Add(gtx.Ops)
 	if row != ed.buf.cursor.row {
@@ -478,7 +478,7 @@ func (ed *Editor) ensure(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Sp, 
 		ln := sh.LayoutString(fnt, textSize, ed.maxSize.X, gtx.Locale, " ")[0]
 		ed.charWidth = ln.Width.Ceil()
 		ed.lnHeight = ln.Ascent.Ceil() + ln.Descent.Ceil()
-		ed.lnNumSpace = ed.charWidth * max(2, len(fmt.Sprint(len(ed.buf.lines))))
+		ed.lnNumSpace = ed.charWidth * max(2, len(strconv.Itoa(len(ed.buf.lines))))
 		ed.buf.vision.h = ed.maxSize.Y / ed.lnHeight
 	}
 	if ed.palette != pal {
