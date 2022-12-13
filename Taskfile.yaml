@@ -1,0 +1,25 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  default:
+    cmds:
+      - task: fmt
+      - go build -ldflags="-s -w" -o mdedit cmd/mdedit/main.go
+      - task: lint
+
+  nowayland:
+    cmds:
+      - task: fmt
+      - go build -ldflags="-s -w" -tags nowayland -o mdedit cmd/mdedit/main.go
+      - task: lint
+
+  fmt:
+    cmds:
+      - goimports -w -l .
+      - gofumpt -w -l .
+
+  lint:
+    cmds:
+      - go vet ./...
