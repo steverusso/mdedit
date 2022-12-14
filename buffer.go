@@ -179,7 +179,7 @@ func (b *buffer) set(data []byte) {
 		}
 	}
 	if len(lines) == 0 {
-		lines = []line{{}}
+		lines = append(lines, line{})
 	}
 	b.lines = lines
 }
