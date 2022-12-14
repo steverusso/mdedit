@@ -123,6 +123,7 @@ func (b *buffer) insertNewLine() {
 	// Insert a duplicate of the current line and cursor to the beginning of that new line.
 	b.lines = append(b.lines[:b.cursor.row+1], b.lines[b.cursor.row:]...)
 	b.cursor.col = 0
+	b.prefCol = 0
 	b.cursor.row++
 	// Set the new line's text to the previous line's truncated text.
 	b.lines[b.cursor.row] = trunced
@@ -133,6 +134,7 @@ func (b *buffer) insert(txt string) {
 	col := b.cursor.col
 	ln.text = append(ln.text[:col], append([]byte(txt), ln.text[col:]...)...)
 	b.cursor.col += len(txt)
+	b.prefCol = b.cursor.col
 }
 
 func (b *buffer) mvCursorIntoView() {

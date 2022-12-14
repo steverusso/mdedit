@@ -177,6 +177,7 @@ func (ed *Editor) processInsertEvents(gtx C) {
 
 func (ed *Editor) exitInsertMode() {
 	ed.buf.cursor.col = max(0, ed.buf.cursor.col-1)
+	ed.buf.prefCol = ed.buf.cursor.col
 	ed.mode = modeNormal
 	ed.history = append(ed.history, ed.active)
 	ed.active = action{}
