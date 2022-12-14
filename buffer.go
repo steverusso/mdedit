@@ -4,6 +4,11 @@ type buffer struct {
 	lines  []line
 	cursor position
 	vision vision
+	// prefCol is the preferred column index when moving to a new line. For example, if a
+	// user is on the 2nd character on a line and starts moving around by line, then the
+	// cursor should be on (or as close to) the 2nd character of each of those lines. A
+	// value of `-1` indicates "end of the line."
+	prefCol int
 }
 
 type line struct {
@@ -277,17 +282,19 @@ const (
 )
 
 type iter struct {
-	buf    *buffer
-	eolpol eolPolicy
-	row    int
-	col    int
+	buf     *buffer
+	eolpol  eolPolicy
+	row     int
+	col     int
+	prefCol int
 }
 
 func newIter(b *buffer) iter {
 	return iter{
-		buf: b,
-		row: b.cursor.row,
-		col: b.cursor.col,
+		buf:     b,
+		row:     b.cursor.row,
+		col:     b.cursor.col,
+		prefCol: b.prefCol,
 	}
 }
 
@@ -342,12 +349,18 @@ func (it *iter) seekNthLineFromBot(count int) {
 }
 
 func (it *iter) seekByX(inc int) {
+	lnLen := len(it.buf.lines[it.row].text)
 	target := it.col + inc
-	ceil := max(0, len(it.buf.lines[it.row].text)-1)
+	ceil := max(0, lnLen-1)
 	if it.eolpol == eolInclusive {
 		ceil++
 	}
-	it.col = max(min(target, ceil), 0)
+	if target > 0 && target <= ceil {
+		it.col = target
+		it.prefCol = target
+	} else {
+		it.col = max(min(target, ceil), 0)
+	}
 }
 
 func (it *iter) seekByY(inc int) {
@@ -362,20 +375,24 @@ func (it *iter) seekByWordStart(count int, direction iterDirection) {
 	for it.step(direction) {
 		ln := it.buf.lines[it.row].text
 		if len(ln) != 0 && it.eolpol == eolInclusive && it.col == len(ln) && counter == count-1 {
-			return
+			break
 		}
 		if len(ln) == 0 || (it.eolpol == eolInclusive && it.col == len(ln)) || (!isSpace(ln[it.col]) && (it.col == 0 || isSpace(ln[it.col-1]))) {
 			counter++
 		}
 		if counter == count {
-			return
+			break
 		}
 	}
+	it.prefCol = it.col
 }
 
 func (it *iter) ensureX() {
-	if lnLen := len(it.buf.lines[it.row].text); it.col >= lnLen {
+	lnLen := len(it.buf.lines[it.row].text)
+	if it.prefCol >= lnLen || it.prefCol == -1 {
 		it.col = max(lnLen-1, 0)
+	} else {
+		it.col = it.prefCol
 	}
 }
 

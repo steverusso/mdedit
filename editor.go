@@ -227,13 +227,21 @@ func (ed *Editor) exec(c *command) {
 }
 
 func (ed *Editor) movement(c *command) {
+	if c.motionChar1 == '0' {
+		ed.buf.cursor.col = 0
+		ed.buf.prefCol = 0
+		return
+	}
+	if c.motionChar1 == '$' {
+		n := ed.buf.cursor.row + max(0, c.motionCount-1)
+		ed.buf.cursor.row = min(len(ed.buf.lines)-1, n)
+		ed.buf.cursor.col = max(0, len(ed.buf.lines[ed.buf.cursor.row].text)-1)
+		ed.buf.prefCol = -1
+		return
+	}
 	it := newIter(&ed.buf)
 	n := c.motionCount
 	switch c.motionChar1 {
-	case '0':
-		it.col = 0
-	case '$':
-		it.col = max(0, len(ed.buf.lines[it.row].text)-1)
 	case 'h':
 		it.seekByX(min(-1, 0-n))
 	case 'l', ' ':
@@ -252,6 +260,7 @@ func (ed *Editor) movement(c *command) {
 		it.seekNthLineFromBot(max(n-1, 0))
 	}
 	ed.buf.cursor = it.position()
+	ed.buf.prefCol = it.prefCol
 }
 
 func (ed *Editor) gExec(c *command) {
