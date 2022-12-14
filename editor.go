@@ -100,18 +100,11 @@ func (ed *Editor) processNormalEvents(gtx C) {
 	for _, e := range gtx.Events(&ed.eventKey) {
 		switch e := e.(type) {
 		case key.Event:
-			switch {
-			case e.State != key.Press:
-				break
-			case e.Name == key.NameDeleteForward:
-				if ed.pending.motionCount != 0 || ed.pending.motionChar1 != 0 {
-					ed.pending = command{}
-				} else {
-					ed.exec(&command{cmdChar: 'x'})
-				}
-			case e.Name == key.NameEscape:
-				ed.pending = command{}
-			case e.Modifiers == key.ModCtrl:
+			if e.State != key.Press {
+				continue
+			}
+			switch e.Modifiers {
+			case key.ModCtrl:
 				switch e.Name {
 				case "E":
 					ed.buf.scrollVision(1)
@@ -119,6 +112,17 @@ func (ed *Editor) processNormalEvents(gtx C) {
 					// TODO redo?
 				case "S":
 					ed.reqSave = true
+				}
+			case 0:
+				switch e.Name {
+				case key.NameDeleteForward:
+					if ed.pending.motionCount != 0 || ed.pending.motionChar1 != 0 {
+						ed.pending = command{}
+					} else {
+						ed.exec(&command{cmdChar: 'x'})
+					}
+				case key.NameEscape:
+					ed.pending = command{}
 				}
 			}
 		case key.EditEvent:
@@ -138,19 +142,20 @@ func (ed *Editor) processInsertEvents(gtx C) {
 	for _, e := range gtx.Events(&ed.eventKey) {
 		switch e := e.(type) {
 		case key.Event:
-			switch {
-			case e.State != key.Press:
-				break
-			case e.Name == key.NameDeleteBackward:
+			if e.State != key.Press {
+				continue
+			}
+			switch e.Name {
+			case key.NameDeleteBackward:
 				ed.buf.deleteBack()
 				ed.highlight()
-			case e.Name == key.NameDeleteForward:
+			case key.NameDeleteForward:
 				ed.buf.deleteForwardInsert()
 				ed.highlight()
-			case e.Name == key.NameReturn:
+			case key.NameReturn:
 				ed.buf.insertNewLine()
 				ed.highlight()
-			case e.Name == key.NameEscape:
+			case key.NameEscape:
 				ed.exitInsertMode()
 			}
 		case key.EditEvent:
