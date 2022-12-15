@@ -77,8 +77,7 @@ func (ed *Editor) Layout(gtx C, sh text.Shaper, fnt text.Font, txtSize unit.Sp, 
 func (ed *Editor) processEvents(gtx C) {
 	const keySet = "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|U|X|Y|Z" +
 		"|" + "Ctrl-[E,R,S]" +
-		"|" + key.NameDeleteBackward +
-		"|" + key.NameDeleteForward +
+		"|" + key.NameDeleteBackward + "|" + key.NameDeleteForward +
 		"|" + key.NameLeftArrow + "|" + key.NameRightArrow +
 		"|" + key.NameUpArrow + "|" + key.NameDownArrow +
 		"|" + key.NameEscape +
@@ -112,6 +111,17 @@ func (ed *Editor) processNormalEvents(gtx C) {
 				}
 			case 0:
 				switch e.Name {
+				case key.NameDeleteBackward:
+					it := newIter(&ed.buf)
+					it.step(iterBackward)
+					ed.buf.cursor = it.position()
+					ed.buf.prefCol = ed.buf.cursor.col
+				case key.NameDeleteForward:
+					if ed.pending.motionCount != 0 || ed.pending.motionChar1 != 0 {
+						ed.pending = command{}
+					} else {
+						ed.exec(&command{cmdChar: 'x'})
+					}
 				case key.NameLeftArrow:
 					ed.buf.cursor.col = max(0, ed.buf.cursor.col-1)
 					ed.buf.prefCol = ed.buf.cursor.col
@@ -127,12 +137,6 @@ func (ed *Editor) processNormalEvents(gtx C) {
 					if ed.buf.cursor.row < len(ed.buf.lines)-1 {
 						ed.buf.cursor.row++
 						ed.buf.clampCol()
-					}
-				case key.NameDeleteForward:
-					if ed.pending.motionCount != 0 || ed.pending.motionChar1 != 0 {
-						ed.pending = command{}
-					} else {
-						ed.exec(&command{cmdChar: 'x'})
 					}
 				case key.NameEscape:
 					ed.pending = command{}
@@ -163,6 +167,12 @@ func (ed *Editor) processInsertEvents(gtx C) {
 				continue
 			}
 			switch e.Name {
+			case key.NameDeleteBackward:
+				ed.buf.deleteBack()
+				ed.highlight()
+			case key.NameDeleteForward:
+				ed.buf.deleteForwardInsert()
+				ed.highlight()
 			case key.NameLeftArrow:
 				ed.buf.cursor.col = max(0, ed.buf.cursor.col-1)
 				ed.buf.prefCol = ed.buf.cursor.col
@@ -179,12 +189,6 @@ func (ed *Editor) processInsertEvents(gtx C) {
 					ed.buf.cursor.row++
 					ed.buf.clampCol()
 				}
-			case key.NameDeleteBackward:
-				ed.buf.deleteBack()
-				ed.highlight()
-			case key.NameDeleteForward:
-				ed.buf.deleteForwardInsert()
-				ed.highlight()
 			case key.NameReturn:
 				ed.buf.insertNewLine()
 				ed.highlight()
