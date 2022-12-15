@@ -22,11 +22,6 @@ type mode byte
 const (
 	modeNormal mode = iota
 	modeInsert
-	modeInsertNormal
-	modeVisual
-	modeVisualLine
-	modeVisualBlock
-	modeCommand
 )
 
 type Editor struct {
