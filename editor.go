@@ -125,14 +125,8 @@ func (ed *Editor) processNormalEvents(gtx C) {
 					ed.pending = command{}
 				case key.NameReturn:
 					ed.buf.cursor.row = min(ed.buf.cursor.row+1, len(ed.buf.lines)-1)
-					var col int
-					for i, c := range ed.buf.currentLine().text {
-						if !isSpace(c) {
-							col = i
-							break
-						}
-					}
-					ed.buf.cursor.col = col
+					ed.buf.cursor.col = ed.buf.currentLine().startingIndex()
+					ed.buf.prefCol = ed.buf.cursor.col
 				}
 			}
 		case key.EditEvent:
