@@ -84,6 +84,8 @@ func (ed *Editor) processEvents(gtx C) {
 		"|" + "Ctrl-[E,R,S]" +
 		"|" + key.NameDeleteBackward +
 		"|" + key.NameDeleteForward +
+		"|" + key.NameLeftArrow + "|" + key.NameRightArrow +
+		"|" + key.NameUpArrow + "|" + key.NameDownArrow +
 		"|" + key.NameEscape +
 		"|" + key.NameReturn
 
@@ -115,6 +117,22 @@ func (ed *Editor) processNormalEvents(gtx C) {
 				}
 			case 0:
 				switch e.Name {
+				case key.NameLeftArrow:
+					ed.buf.cursor.col = max(0, ed.buf.cursor.col-1)
+					ed.buf.prefCol = ed.buf.cursor.col
+				case key.NameRightArrow:
+					ed.buf.cursor.col = min(ed.buf.cursor.col+1, len(ed.buf.currentLine().text)-1)
+					ed.buf.prefCol = ed.buf.cursor.col
+				case key.NameUpArrow:
+					if ed.buf.cursor.row > 0 {
+						ed.buf.cursor.row--
+						ed.buf.clampCol()
+					}
+				case key.NameDownArrow:
+					if ed.buf.cursor.row < len(ed.buf.lines)-1 {
+						ed.buf.cursor.row++
+						ed.buf.clampCol()
+					}
 				case key.NameDeleteForward:
 					if ed.pending.motionCount != 0 || ed.pending.motionChar1 != 0 {
 						ed.pending = command{}
@@ -150,6 +168,22 @@ func (ed *Editor) processInsertEvents(gtx C) {
 				continue
 			}
 			switch e.Name {
+			case key.NameLeftArrow:
+				ed.buf.cursor.col = max(0, ed.buf.cursor.col-1)
+				ed.buf.prefCol = ed.buf.cursor.col
+			case key.NameRightArrow:
+				ed.buf.cursor.col = min(ed.buf.cursor.col+1, len(ed.buf.currentLine().text))
+				ed.buf.prefCol = ed.buf.cursor.col
+			case key.NameUpArrow:
+				if ed.buf.cursor.row > 0 {
+					ed.buf.cursor.row--
+					ed.buf.clampCol()
+				}
+			case key.NameDownArrow:
+				if ed.buf.cursor.row < len(ed.buf.lines)-1 {
+					ed.buf.cursor.row++
+					ed.buf.clampCol()
+				}
 			case key.NameDeleteBackward:
 				ed.buf.deleteBack()
 				ed.highlight()

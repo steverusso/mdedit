@@ -27,6 +27,15 @@ type vision struct {
 	h int
 }
 
+func (b *buffer) clampCol() {
+	lnLen := len(b.lines[b.cursor.row].text)
+	if b.prefCol >= lnLen || b.prefCol == -1 {
+		b.cursor.col = max(0, lnLen-1)
+	} else {
+		b.cursor.col = b.prefCol
+	}
+}
+
 func (b *buffer) currentLine() *line {
 	return &b.lines[b.cursor.row]
 }
