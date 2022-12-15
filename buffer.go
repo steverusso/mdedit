@@ -27,10 +27,13 @@ type vision struct {
 	h int
 }
 
-func (b *buffer) clampCol() {
-	lnLen := len(b.lines[b.cursor.row].text)
-	if b.prefCol >= lnLen || b.prefCol == -1 {
-		b.cursor.col = max(0, lnLen-1)
+func (b *buffer) clampCol(eolExclusive bool) {
+	ceil := len(b.lines[b.cursor.row].text)
+	if eolExclusive {
+		ceil--
+	}
+	if b.prefCol > ceil || b.prefCol == -1 {
+		b.cursor.col = max(0, ceil)
 	} else {
 		b.cursor.col = b.prefCol
 	}

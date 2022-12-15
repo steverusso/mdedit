@@ -80,6 +80,7 @@ func (ed *Editor) processEvents(gtx C) {
 		"|" + key.NameDeleteBackward + "|" + key.NameDeleteForward +
 		"|" + key.NameLeftArrow + "|" + key.NameRightArrow +
 		"|" + key.NameUpArrow + "|" + key.NameDownArrow +
+		"|" + key.NameHome + "|" + key.NameEnd +
 		"|" + key.NameEscape +
 		"|" + key.NameReturn
 
@@ -131,13 +132,19 @@ func (ed *Editor) processNormalEvents(gtx C) {
 				case key.NameUpArrow:
 					if ed.buf.cursor.row > 0 {
 						ed.buf.cursor.row--
-						ed.buf.clampCol()
+						ed.buf.clampCol(ed.mode == modeNormal)
 					}
 				case key.NameDownArrow:
 					if ed.buf.cursor.row < len(ed.buf.lines)-1 {
 						ed.buf.cursor.row++
-						ed.buf.clampCol()
+						ed.buf.clampCol(ed.mode == modeNormal)
 					}
+				case key.NameHome:
+					ed.buf.cursor.col = 0
+					ed.buf.prefCol = 0
+				case key.NameEnd:
+					ed.buf.cursor.col = max(0, len(ed.buf.currentLine().text)-1)
+					ed.buf.prefCol = -1
 				case key.NameEscape:
 					ed.pending = command{}
 				case key.NameReturn:
@@ -182,13 +189,19 @@ func (ed *Editor) processInsertEvents(gtx C) {
 			case key.NameUpArrow:
 				if ed.buf.cursor.row > 0 {
 					ed.buf.cursor.row--
-					ed.buf.clampCol()
+					ed.buf.clampCol(ed.mode == modeNormal)
 				}
 			case key.NameDownArrow:
 				if ed.buf.cursor.row < len(ed.buf.lines)-1 {
 					ed.buf.cursor.row++
-					ed.buf.clampCol()
+					ed.buf.clampCol(ed.mode == modeNormal)
 				}
+			case key.NameHome:
+				ed.buf.cursor.col = 0
+				ed.buf.prefCol = 0
+			case key.NameEnd:
+				ed.buf.cursor.col = max(0, len(ed.buf.currentLine().text))
+				ed.buf.prefCol = -1
 			case key.NameReturn:
 				ed.buf.insertNewLine()
 				ed.highlight()
