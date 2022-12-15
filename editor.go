@@ -127,7 +127,7 @@ func (ed *Editor) processNormalEvents(gtx C) {
 					ed.buf.cursor.col = max(0, ed.buf.cursor.col-1)
 					ed.buf.prefCol = ed.buf.cursor.col
 				case key.NameRightArrow:
-					ed.buf.cursor.col = min(ed.buf.cursor.col+1, len(ed.buf.currentLine().text)-1)
+					ed.buf.cursor.col = min(ed.buf.cursor.col+1, ed.buf.currLineLen()-1)
 					ed.buf.prefCol = ed.buf.cursor.col
 				case key.NameUpArrow:
 					if ed.buf.cursor.row > 0 {
@@ -143,7 +143,7 @@ func (ed *Editor) processNormalEvents(gtx C) {
 					ed.buf.cursor.col = 0
 					ed.buf.prefCol = 0
 				case key.NameEnd:
-					ed.buf.cursor.col = max(0, len(ed.buf.currentLine().text)-1)
+					ed.buf.cursor.col = max(0, ed.buf.currLineLen()-1)
 					ed.buf.prefCol = -1
 				case key.NameEscape:
 					ed.pending = command{}
@@ -184,7 +184,7 @@ func (ed *Editor) processInsertEvents(gtx C) {
 				ed.buf.cursor.col = max(0, ed.buf.cursor.col-1)
 				ed.buf.prefCol = ed.buf.cursor.col
 			case key.NameRightArrow:
-				ed.buf.cursor.col = min(ed.buf.cursor.col+1, len(ed.buf.currentLine().text))
+				ed.buf.cursor.col = min(ed.buf.cursor.col+1, ed.buf.currLineLen())
 				ed.buf.prefCol = ed.buf.cursor.col
 			case key.NameUpArrow:
 				if ed.buf.cursor.row > 0 {
@@ -200,7 +200,7 @@ func (ed *Editor) processInsertEvents(gtx C) {
 				ed.buf.cursor.col = 0
 				ed.buf.prefCol = 0
 			case key.NameEnd:
-				ed.buf.cursor.col = max(0, len(ed.buf.currentLine().text))
+				ed.buf.cursor.col = max(0, ed.buf.currLineLen())
 				ed.buf.prefCol = -1
 			case key.NameReturn:
 				ed.buf.insertNewLine()

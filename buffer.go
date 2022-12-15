@@ -43,12 +43,16 @@ func (b *buffer) currentLine() *line {
 	return &b.lines[b.cursor.row]
 }
 
+func (b *buffer) currLineLen() int {
+	return len(b.lines[b.cursor.row].text)
+}
+
 func (b *buffer) cursorRight() {
-	b.cursor.col = min(b.cursor.col+1, len(b.currentLine().text))
+	b.cursor.col = min(b.cursor.col+1, b.currLineLen())
 }
 
 func (b *buffer) cursorToLineEnd() {
-	b.cursor.col = len(b.currentLine().text)
+	b.cursor.col = b.currLineLen()
 }
 
 func (b *buffer) cursorToLineStart() {
