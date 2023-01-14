@@ -36,25 +36,25 @@ func (vs ViewStyle) Layout(gtx C) D {
 	return vs.View.Layout(gtx, vs.Theme, vs.EditorFont, vs.Palette)
 }
 
-type viewMode uint8
+type ViewMode uint8
 
 const (
-	viewModeSplit viewMode = iota
-	viewModeSingle
+	ViewModeSplit ViewMode = iota
+	ViewModeSingle
 )
 
-type activeWidget uint8
+type SingleViewWidget uint8
 
 const (
-	singleViewEditor activeWidget = iota
-	singleViewDocument
+	SingleViewEditor SingleViewWidget = iota
+	SingleViewDocument
 )
 
 type View struct {
 	Editor   Editor
 	document Document
 
-	mode         viewMode
+	Mode         ViewMode
 	doSplitView  widget.Clickable
 	doSingleView widget.Clickable
 
@@ -63,7 +63,7 @@ type View struct {
 	dividerDrag  gesture.Drag
 	dividerClick gesture.Click
 
-	singleWidget activeWidget
+	SingleWidget SingleViewWidget
 	showEditor   widget.Clickable
 	showDocument widget.Clickable
 }
@@ -72,7 +72,7 @@ func (vw *View) Layout(gtx C, th *material.Theme, edFnt text.Font, pal Palette) 
 	vw.update(gtx)
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 		layout.Flexed(1, func(gtx C) D {
-			if vw.mode == viewModeSingle {
+			if vw.Mode == ViewModeSingle {
 				return vw.laySingleView(gtx, th, edFnt, pal)
 			}
 			return vw.laySplitView(gtx, th, edFnt, pal)
@@ -86,21 +86,21 @@ func (vw *View) Layout(gtx C, th *material.Theme, edFnt text.Font, pal Palette) 
 func (vw *View) update(gtx C) {
 	// Update view mode if view mode buttons are clicked.
 	if vw.doSplitView.Clicked() {
-		vw.mode = viewModeSplit
+		vw.Mode = ViewModeSplit
 		op.InvalidateOp{}.Add(gtx.Ops)
 	}
 	if vw.doSingleView.Clicked() {
-		vw.mode = viewModeSingle
+		vw.Mode = ViewModeSingle
 		op.InvalidateOp{}.Add(gtx.Ops)
 	}
 	// Update which single view widget to show.
 	if vw.showEditor.Clicked() {
-		vw.singleWidget = singleViewEditor
+		vw.SingleWidget = SingleViewEditor
 		vw.Editor.Focus()
 		op.InvalidateOp{}.Add(gtx.Ops)
 	}
 	if vw.showDocument.Clicked() {
-		vw.singleWidget = singleViewDocument
+		vw.SingleWidget = SingleViewDocument
 		op.InvalidateOp{}.Add(gtx.Ops)
 	}
 }
@@ -173,7 +173,7 @@ func (vw *View) layDivider(gtx C, w layout.Widget) D {
 }
 
 func (vw *View) laySingleView(gtx C, th *material.Theme, edFnt text.Font, pal Palette) D {
-	if vw.singleWidget == singleViewDocument {
+	if vw.SingleWidget == SingleViewDocument {
 		return vw.document.Layout(gtx, th)
 	}
 	if vw.Editor.HasChanged() {
@@ -188,12 +188,12 @@ func (vw *View) layToolbar(gtx C, th *material.Theme) D {
 		{
 			click:    &vw.doSingleView,
 			icon:     iconWebAsset,
-			disabled: vw.mode == viewModeSingle,
+			disabled: vw.Mode == ViewModeSingle,
 		},
 		{
 			click:    &vw.doSplitView,
 			icon:     iconReader,
-			disabled: vw.mode == viewModeSplit,
+			disabled: vw.Mode == ViewModeSplit,
 		},
 	}
 
@@ -204,7 +204,7 @@ func (vw *View) layToolbar(gtx C, th *material.Theme) D {
 				return D{Size: image.Point{gtx.Constraints.Max.X, 1}}
 			}),
 			layout.Rigid(func(gtx C) D {
-				if vw.mode != viewModeSingle {
+				if vw.Mode != ViewModeSingle {
 					return D{}
 				}
 				return buttonGroup{
@@ -216,12 +216,12 @@ func (vw *View) layToolbar(gtx C, th *material.Theme) D {
 					{
 						click:    &vw.showEditor,
 						icon:     iconEdit,
-						disabled: vw.singleWidget == singleViewEditor,
+						disabled: vw.SingleWidget == SingleViewEditor,
 					},
 					{
 						click:    &vw.showDocument,
 						icon:     iconVisibility,
-						disabled: vw.singleWidget == singleViewDocument,
+						disabled: vw.SingleWidget == SingleViewDocument,
 					},
 				})
 			}),
