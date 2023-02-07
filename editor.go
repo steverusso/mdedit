@@ -176,9 +176,11 @@ func (ed *Editor) processInsertEvents(gtx C) {
 			case key.NameDeleteBackward:
 				ed.buf.deleteBack()
 				ed.highlight()
+				ed.changed = true
 			case key.NameDeleteForward:
 				ed.buf.deleteForwardInsert()
 				ed.highlight()
+				ed.changed = true
 			case key.NameLeftArrow:
 				ed.buf.cursor.col = max(0, ed.buf.cursor.col-1)
 				ed.buf.prefCol = ed.buf.cursor.col
@@ -204,13 +206,14 @@ func (ed *Editor) processInsertEvents(gtx C) {
 			case key.NameReturn:
 				ed.buf.insertNewLine()
 				ed.highlight()
+				ed.changed = true
 			case key.NameEscape:
 				ed.exitInsertMode()
 			}
 		case key.EditEvent:
 			ed.buf.insert(e.Text)
+			ed.changed = true
 		}
-		ed.changed = true
 	}
 }
 
