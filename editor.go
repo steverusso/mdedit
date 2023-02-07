@@ -159,7 +159,6 @@ func (ed *Editor) processNormalEvents(gtx C) {
 				ed.exec(&ed.pending)
 				ed.active.cmd = ed.pending
 				ed.pending = command{}
-				ed.changed = true
 			}
 		}
 		ed.buf.mvViewIntoCursor()
@@ -235,6 +234,7 @@ func (ed *Editor) exec(c *command) {
 			ed.movement(c)
 		case 'x':
 			ed.buf.deleteForwardNormal()
+			ed.changed = true
 		case 'i':
 			ed.mode = modeInsert
 		case 'I':
@@ -249,15 +249,19 @@ func (ed *Editor) exec(c *command) {
 		case 'S':
 			ed.buf.truncCurrentLineFromStart()
 			ed.mode = modeInsert
+			ed.changed = true
 		case 'O', 'o':
 			ed.buf.startNewLine(c.cmdChar == 'o')
 			ed.mode = modeInsert
+			ed.changed = true
 		case 'C':
 			ed.buf.truncCurrentLineFromCursor()
 			ed.mode = modeInsert
+			ed.changed = true
 		}
 	case 'd':
 		ed.del(c)
+		ed.changed = true
 	case 'y':
 		// TODO yank whatever motion covers
 	case 'P':
