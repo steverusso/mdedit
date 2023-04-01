@@ -42,7 +42,7 @@ func (s *styleBuilder) add(v uint16, col int) {
 
 type mdHighlighter struct{}
 
-func (_ mdHighlighter) highlight(buf *buffer) [][]mdStyleMark {
+func (mdHighlighter) highlight(buf *buffer) [][]mdStyleMark {
 	const (
 		bqStarted uint8 = iota + 1
 		bqHitChar

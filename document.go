@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"io/ioutil"
+	"io"
 	"strings"
 
 	"gioui.org/layout"
@@ -366,7 +366,7 @@ func (r *docRenderer) Render(th *material.Theme, src []byte) ([]spanGroup, error
 	}
 	l := material.Body1(th, "")
 	r.sb.useStyle(l)
-	if err := r.md.Convert(src, ioutil.Discard); err != nil {
+	if err := r.md.Convert(src, io.Discard); err != nil {
 		return nil, err
 	}
 	return r.sb.Result(), nil

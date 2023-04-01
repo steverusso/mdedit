@@ -62,7 +62,7 @@ func (d *diskFS) WorkingDir() string {
 	return d.workingDir
 }
 
-func (_ *diskFS) ReadDir(fpath string) ([]fs.FileInfo, error) {
+func (*diskFS) ReadDir(fpath string) ([]fs.FileInfo, error) {
 	entries, err := os.ReadDir(fpath)
 	if err != nil {
 		return nil, fmt.Errorf("reading '%s': %w", fpath, err)
@@ -78,11 +78,11 @@ func (_ *diskFS) ReadDir(fpath string) ([]fs.FileInfo, error) {
 	return infos, nil
 }
 
-func (_ *diskFS) ReadFile(fpath string) ([]byte, error) {
+func (*diskFS) ReadFile(fpath string) ([]byte, error) {
 	return os.ReadFile(fpath)
 }
 
-func (_ *diskFS) WriteFile(fpath string, data []byte) error {
+func (*diskFS) WriteFile(fpath string, data []byte) error {
 	return os.WriteFile(fpath, data, 0o644)
 }
 
@@ -151,7 +151,7 @@ func run() error {
 
 			e.Frame(gtx.Ops)
 			if *printFrameTimes {
-				log.Println(time.Now().Sub(start))
+				log.Println(time.Since(start))
 			}
 		case system.DestroyEvent:
 			return e.Err

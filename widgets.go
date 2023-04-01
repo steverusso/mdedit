@@ -26,7 +26,6 @@ var (
 	iconReader     = mustIcon(icons.ActionChromeReaderMode)
 	iconRegFile    = mustIcon(icons.ActionDescription)
 	iconVisibility = mustIcon(icons.ActionVisibility)
-	iconUnknown    = mustIcon(icons.ContentBlock)
 	iconWebAsset   = mustIcon(icons.AVWebAsset)
 )
 
