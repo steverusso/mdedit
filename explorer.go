@@ -180,29 +180,6 @@ func (ex *Explorer) selectedEntries() (sel []fs.FileInfo) {
 	return
 }
 
-func (ex *Explorer) add(info fs.FileInfo) {
-	uth := newExplorerEntry(info)
-	for i, th := range ex.entries {
-		if uth.isLessThan(&th) {
-			ex.entries = append(ex.entries[:i], append([]explEntry{uth}, ex.entries[i:]...)...)
-			return
-		}
-	}
-	ex.entries = append(ex.entries, uth)
-}
-
-func (ex *Explorer) removeEntries(del []fs.FileInfo) {
-	for _, d := range del {
-		for i := range ex.entries {
-			en := &ex.entries[i]
-			if en.info.Name() == d.Name() {
-				ex.entries = append(ex.entries[:i], ex.entries[i+1:]...)
-				break
-			}
-		}
-	}
-}
-
 func (ex *Explorer) Events() []ExplorerEvent {
 	e := ex.events
 	ex.events = nil
@@ -258,13 +235,6 @@ func newExplorerEntry(info fs.FileInfo) explEntry {
 		lastmod: info.ModTime().Format("2 Jan 2006 15:04"),
 		icon:    icon,
 	}
-}
-
-func (en *explEntry) isLessThan(other *explEntry) bool {
-	if en.info.IsDir() != other.info.IsDir() {
-		return en.info.Name() < other.info.Name()
-	}
-	return en.info.IsDir()
 }
 
 func (en *explEntry) layout(gtx C, th *material.Theme) D {
